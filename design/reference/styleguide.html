@@ -1,0 +1,331 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Work KG — стайлгайд</title>
+<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* ====== ТОКЕНЫ WORK KG — копировать как есть ====== */
+:root{
+  --bg:#F6F5F2; --card:#FFFFFF; --ink:#0E0E10; --ink2:#3F3F46; --muted:#8A8A93; --line:#ECEBE6;
+  --chip-border:#DAD8D2; --soft:#F5F4F0; --track:#F1F0EC;
+  --brand:#B4161B; --brand-soft:#FBEDED; --ok:#0E9F6E; --ok-soft:#E8F6EF; --tick:#1D9BF0;
+  --gig:#5B4BDB; --gig-soft:#EFEDFD; --star:#E8A317; --star-bg:#FDF5E2; --star-off:#D4D2CC;
+  --warn-bg:#FEF3C7; --warn:#92400E; --dispute:#B45309;
+  --wa:#128C7E; --tg:#229ED9; --nav-off:#7B7B84; --heart-off:#C7C5BF;
+  --sh:0 1px 2px rgba(14,14,16,.04),0 10px 30px rgba(14,14,16,.06);
+  --sh-nav:0 14px 40px rgba(14,14,16,.3);
+  --font:Onest,Inter,system-ui,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font);background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased}
+.wrap{max-width:1040px;margin:0 auto;padding:40px 20px 80px}
+header h1{font-size:40px;font-weight:800;letter-spacing:-.035em}
+header p{color:var(--muted);margin-top:8px;font-size:15px;max-width:640px;line-height:1.5}
+section{margin-top:56px}
+section>h2{font-size:24px;font-weight:800;letter-spacing:-.02em;margin-bottom:6px}
+section>.lead{color:var(--muted);font-size:14px;margin-bottom:20px}
+code,.mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px}
+.spec{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11.5px;color:var(--muted);line-height:1.5;margin-top:8px}
+.grid{display:grid;gap:12px}
+.g4{grid-template-columns:repeat(auto-fill,minmax(220px,1fr))}
+.g3{grid-template-columns:repeat(auto-fill,minmax(300px,1fr))}
+.box{background:var(--card);border-radius:20px;padding:18px;box-shadow:var(--sh);min-width:0}
+.label{font-size:12px;font-weight:700;color:var(--muted);letter-spacing:.04em;margin-bottom:12px}
+
+/* swatches */
+.sw{background:var(--card);border-radius:18px;overflow:hidden;box-shadow:var(--sh)}
+.sw .c{height:84px;border-bottom:1px solid var(--line)}
+.sw .i{padding:12px 14px}
+.sw b{font-size:14px}
+.sw .hex{font-family:ui-monospace,Menlo,monospace;font-size:12px;color:var(--ink2);margin-top:2px}
+.sw p{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.4}
+
+/* type */
+.trow{display:grid;grid-template-columns:230px 1fr;gap:20px;align-items:baseline;padding:16px 0;border-bottom:1px solid var(--line)}
+.trow:last-child{border:0}
+@media (max-width:640px){.trow{grid-template-columns:1fr;gap:4px}}
+
+/* ===== компоненты (точные значения из прототипа) ===== */
+.searchbar{display:flex;align-items:center;gap:10px;background:var(--card);border-radius:18px;height:56px;padding:0 18px;color:var(--muted);box-shadow:var(--sh);font-size:16px}
+.chip{display:inline-flex;align-items:center;height:38px;padding:0 16px;border-radius:999px;border:1px solid var(--chip-border);font-size:14px;font-weight:500;color:var(--ink2);background:transparent}
+.chip.on{background:var(--ink);border-color:var(--ink);color:#fff}
+.tabs{display:flex;gap:22px;border-bottom:1px solid var(--line)}
+.tabs span{padding-bottom:12px;font-size:15px;font-weight:600;color:var(--muted);position:relative}
+.tabs span.on{color:var(--ink)}
+.tabs span.on::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:2px;background:var(--ink);border-radius:2px}
+.btn{height:54px;border-radius:18px;font-weight:700;font-size:16px;display:flex;align-items:center;justify-content:center;padding:0 18px;border:0;font-family:inherit}
+.btn.red{background:var(--brand);color:#fff}.btn.ink{background:var(--ink);color:#fff}
+.btn.line{background:var(--card);border:1px solid var(--line);color:var(--ink)}
+.btn.wa{background:var(--wa);color:#fff}.btn.tg{background:var(--tg);color:#fff}
+.btn.sm{height:42px;font-size:14px;border-radius:14px}
+.tick{display:inline-grid;place-items:center;width:16px;height:16px;border-radius:50%;background:var(--tick);color:#fff;flex:none}
+.logo{border-radius:16px;display:grid;place-items:center;color:#fff;font-weight:800;letter-spacing:-.04em;flex:none;background:linear-gradient(140deg,#2A0A09,#B4161B)}
+.job{background:var(--card);border-radius:22px;padding:18px;box-shadow:var(--sh)}
+.job .t{font-size:17px;font-weight:700;letter-spacing:-.015em}
+.job .co{display:flex;align-items:center;gap:6px;font-size:14px;color:var(--ink2);margin-top:3px}
+.job .sal{font-size:17px;font-weight:700;margin-top:14px}
+.job .meta{font-size:13.5px;color:var(--muted);margin-top:4px}
+.cocard{width:280px;max-width:100%;border-radius:26px;background:var(--card);box-shadow:var(--sh);overflow:hidden}
+.cover{position:relative;overflow:hidden;color:#fff;background:radial-gradient(120% 90% at 100% 0%,#B4161B,transparent 65%),radial-gradient(90% 70% at 0% 100%,rgba(0,0,0,.55),transparent),linear-gradient(140deg,#2A0A09,#B4161B)}
+.cover .mono{position:absolute;right:-10px;bottom:-34px;font-size:150px;font-weight:800;letter-spacing:-.06em;opacity:.13;line-height:1}
+.cocard .cover{height:150px;padding:16px;display:flex;flex-direction:column;justify-content:space-between}
+.rating{display:inline-flex;align-items:center;gap:4px;font-weight:600;font-size:14px}
+.rating i{color:var(--star);font-style:normal}
+.facts{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.fact{background:var(--card);border-radius:18px;padding:14px 12px;box-shadow:var(--sh)}
+.fact span{display:block;font-size:12px;color:var(--muted)}
+.fact b{display:block;font-size:15px;margin-top:4px;font-weight:700}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);background:var(--card);border-radius:22px;box-shadow:var(--sh)}
+.stats div{padding:16px 8px;text-align:center}
+.stats div+div{border-left:1px solid var(--line)}
+.stats b{display:block;font-size:20px;font-weight:800;letter-spacing:-.02em}
+.stats span{font-size:12px;color:var(--muted)}
+.status{display:inline-block;font-size:12px;font-weight:700;padding:5px 10px;border-radius:999px}
+.stars{display:flex;gap:8px}
+.stars span{width:46px;height:46px;border-radius:14px;background:var(--soft);display:grid;place-items:center;color:var(--star-off);font-size:20px}
+.stars span.on{color:var(--star);background:var(--star-bg)}
+.field label{display:block;font-size:13.5px;font-weight:600;color:var(--ink2);margin-bottom:8px}
+.input{width:100%;border:1px solid var(--line);background:var(--card);border-radius:16px;padding:15px;font-size:16px;font-family:inherit;color:var(--ink)}
+.input.focus{border-color:var(--ink)}.input.err{border-color:var(--brand)}
+.hint{font-size:12.5px;color:var(--muted);margin-top:6px}.hint.err{color:var(--brand)}
+.perk{display:inline-flex;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:9px 12px;font-size:14px;font-weight:500}
+.nav{height:70px;background:rgba(14,14,16,.94);border-radius:26px;display:flex;align-items:center;padding:0 6px;box-shadow:var(--sh-nav)}
+.nav div{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;font-size:11px;font-weight:500;color:var(--nav-off);position:relative}
+.nav div.on{color:#fff}
+.nav .fab{flex:none;width:52px;height:52px;border-radius:18px;background:#fff;color:var(--ink);display:grid;place-items:center;margin:0 4px;font-size:26px;font-weight:300}
+.nav .badge{position:absolute;top:-6px;left:calc(50% + 6px);background:var(--brand);color:#fff;font-size:10px;min-width:17px;height:17px;border-radius:9px;display:grid;place-items:center;padding:0 4px;font-weight:700}
+.opt{display:flex;gap:14px;align-items:center;background:var(--card);border-radius:20px;padding:16px;box-shadow:var(--sh)}
+.opt .ic{width:46px;height:46px;border-radius:14px;display:grid;place-items:center;flex:none;background:var(--ink);color:#fff}
+.toast{background:var(--ink);color:#fff;border-radius:16px;padding:14px 16px;font-size:14px}
+.gig{display:flex;gap:14px;align-items:center}
+.gig .when{width:56px;height:56px;border-radius:16px;background:var(--gig-soft);color:var(--gig);display:flex;flex-direction:column;align-items:center;justify-content:center;flex:none;font-weight:700;line-height:1.1}
+.gig .when small{font-size:11px;font-weight:600}
+.balance{border-radius:26px;padding:22px;color:#fff;background:radial-gradient(120% 90% at 100% 0%,#B4161B,transparent 60%),linear-gradient(135deg,#0E0E10,#2A0B0C)}
+.sheet{background:var(--bg);border-radius:30px 30px 0 0;padding:12px 20px 20px;border:1px solid var(--line)}
+.grab{width:40px;height:5px;border-radius:3px;background:var(--star-off);margin:0 auto 18px}
+table{width:100%;border-collapse:collapse;font-size:14px}
+td,th{padding:10px 8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+th{font-size:12px;color:var(--muted);font-weight:700}
+td:first-child{font-weight:600}
+.tw{overflow-x:auto}
+pre{background:var(--ink);color:#E9E7E1;border-radius:20px;padding:20px;overflow-x:auto;font-size:12.5px;line-height:1.6}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>Work KG — стайлгайд</h1>
+  <p>Точные значения из прототипа: цвета, шрифты, размеры и компоненты. Все размеры в px для экрана шириной 390 px. Под каждым компонентом — его параметры.</p>
+</header>
+
+<!-- ================= ЦВЕТА ================= -->
+<section>
+  <h2>Цвета</h2>
+  <div class="lead">Основная палитра. Красный — только для главного действия на экране.</div>
+  <div class="grid g4">
+    <div class="sw"><div class="c" style="background:#F6F5F2"></div><div class="i"><b>bg</b><div class="hex">#F6F5F2</div><p>Фон всех экранов и нижних листов</p></div></div>
+    <div class="sw"><div class="c" style="background:#FFFFFF"></div><div class="i"><b>card</b><div class="hex">#FFFFFF</div><p>Карточки, поля, кнопки-обводки</p></div></div>
+    <div class="sw"><div class="c" style="background:#0E0E10"></div><div class="i"><b>ink</b><div class="hex">#0E0E10</div><p>Основной текст, тёмные кнопки, активный чип, таб-бар (94%)</p></div></div>
+    <div class="sw"><div class="c" style="background:#3F3F46"></div><div class="i"><b>ink2</b><div class="hex">#3F3F46</div><p>Второй текст: компания в карточке, описание, подписи полей</p></div></div>
+    <div class="sw"><div class="c" style="background:#8A8A93"></div><div class="i"><b>muted</b><div class="hex">#8A8A93</div><p>Мета, подсказки, неактивные вкладки, плейсхолдеры</p></div></div>
+    <div class="sw"><div class="c" style="background:#ECEBE6"></div><div class="i"><b>line</b><div class="hex">#ECEBE6</div><p>Разделители, рамки полей</p></div></div>
+    <div class="sw"><div class="c" style="background:#DAD8D2"></div><div class="i"><b>chip-border</b><div class="hex">#DAD8D2</div><p>Рамка неактивного чипа</p></div></div>
+    <div class="sw"><div class="c" style="background:#F5F4F0"></div><div class="i"><b>soft</b><div class="hex">#F5F4F0</div><p>Фон кнопок-звёзд, блок бота. Дорожка шкалы #F1F0EC</p></div></div>
+    <div class="sw"><div class="c" style="background:#B4161B"></div><div class="i"><b>brand</b><div class="hex">#B4161B</div><p>Главная кнопка, счётчик на табе, ошибки, активное сердечко</p></div></div>
+    <div class="sw"><div class="c" style="background:#FBEDED"></div><div class="i"><b>brand-soft</b><div class="hex">#FBEDED</div><p>Красная плашка-подсказка, статус «Оцените»</p></div></div>
+    <div class="sw"><div class="c" style="background:#0E9F6E"></div><div class="i"><b>ok</b><div class="hex">#0E9F6E</div><p>«Платит вовремя», «✓ Подтверждено», переключатель вкл.</p></div></div>
+    <div class="sw"><div class="c" style="background:#E8F6EF"></div><div class="i"><b>ok-soft</b><div class="hex">#E8F6EF</div><p>Фон «Вы получите»</p></div></div>
+    <div class="sw"><div class="c" style="background:#1D9BF0"></div><div class="i"><b>tick</b><div class="hex">#1D9BF0</div><p>Галочка проверенной компании</p></div></div>
+    <div class="sw"><div class="c" style="background:#5B4BDB"></div><div class="i"><b>gig</b><div class="hex">#5B4BDB</div><p>Подработка. Светлый фон gig-soft #EFEDFD</p></div></div>
+    <div class="sw"><div class="c" style="background:#E8A317"></div><div class="i"><b>star</b><div class="hex">#E8A317</div><p>Звёзды. Фон выбранной #FDF5E2, пустая #D4D2CC</p></div></div>
+    <div class="sw"><div class="c" style="background:#FEF3C7"></div><div class="i"><b>warn</b><div class="hex">#FEF3C7 / #92400E</div><p>Статус «Связались», «Истекает завтра»</p></div></div>
+    <div class="sw"><div class="c" style="background:#B45309"></div><div class="i"><b>dispute</b><div class="hex">#B45309</div><p>«⚖️ Компания оспорила»</p></div></div>
+    <div class="sw"><div class="c" style="background:#128C7E"></div><div class="i"><b>WhatsApp</b><div class="hex">#128C7E</div><p>Кнопка WhatsApp</p></div></div>
+    <div class="sw"><div class="c" style="background:#229ED9"></div><div class="i"><b>Telegram</b><div class="hex">#229ED9</div><p>Кнопка Telegram</p></div></div>
+    <div class="sw"><div class="c" style="background:#7B7B84"></div><div class="i"><b>nav-off</b><div class="hex">#7B7B84</div><p>Неактивные пункты таб-бара (активные #FFFFFF)</p></div></div>
+  </div>
+
+  <div class="grid g3" style="margin-top:12px">
+    <div class="box"><div class="label">ТЕНЬ КАРТОЧЕК</div><div style="height:70px;border-radius:18px;background:#fff;box-shadow:var(--sh)"></div><div class="spec">0 1px 2px rgba(14,14,16,.04),<br>0 10px 30px rgba(14,14,16,.06)</div></div>
+    <div class="box"><div class="label">КАРТОЧКА БАЛАНСА</div><div class="balance" style="padding:16px"><div style="font-size:12px;opacity:.7">Баланс</div><div style="font-size:40px;font-weight:800;letter-spacing:-.03em">1 250</div></div><div class="spec">radial-gradient(120% 90% at 100% 0%, #B4161B, transparent 60%),<br>linear-gradient(135deg, #0E0E10, #2A0B0C)</div></div>
+    <div class="box"><div class="label">ОБЛОЖКА БЕЗ ФОТО</div><div class="cover" style="height:90px;border-radius:16px"><div class="mono" style="font-size:110px;bottom:-26px">TK</div></div><div class="spec">radial(цвет2 сверху справа) + тень снизу слева + linear 140° цвет1 → цвет2; буква 150px / 800 / белая 13%</div></div>
+  </div>
+</section>
+
+<!-- ================= ШРИФТЫ ================= -->
+<section>
+  <h2>Шрифты</h2>
+  <div class="lead">Один шрифт — Onest (Google Fonts), 400 / 500 / 600 / 700 / 800. Капс не используется.</div>
+  <div class="box">
+    <div class="trow"><div class="spec">Сумма вывода<br>44 · 800 · −4%</div><div style="font-size:44px;font-weight:800;letter-spacing:-.04em">62,50 сом</div></div>
+    <div class="trow"><div class="spec">H1<br>30 / 1.08 · 800 · −3.5%</div><div style="font-size:30px;line-height:1.08;font-weight:800;letter-spacing:-.035em">Работа в лучших<br>местах Бишкека</div></div>
+    <div class="trow"><div class="spec">Название компании<br>28 · 800 · −3.5%</div><div style="font-size:28px;font-weight:800;letter-spacing:-.035em">Tash Kitchen</div></div>
+    <div class="trow"><div class="spec">Зарплата в вакансии<br>22 · 700 · −2% + 14 · 500 muted</div><div style="font-size:22px;font-weight:700;letter-spacing:-.02em">35 000 – 45 000 сом<span style="font-size:14px;font-weight:500;color:var(--muted)"> / мес</span></div></div>
+    <div class="trow"><div class="spec">H2 · секции<br>20 · 700 · −2%</div><div style="font-size:20px;font-weight:700;letter-spacing:-.02em">Топ работодатели</div></div>
+    <div class="trow"><div class="spec">Цифры статистики<br>20 · 800 · −2%</div><div style="font-size:20px;font-weight:800;letter-spacing:-.02em">120+ &nbsp; 46 &nbsp; 2023</div></div>
+    <div class="trow"><div class="spec">Должность / зарплата в карточке<br>17 · 700 · −1.5%</div><div style="font-size:17px;font-weight:700;letter-spacing:-.015em">Официант · 35 000 – 45 000 сом</div></div>
+    <div class="trow"><div class="spec">H3 · названия в списках<br>16 · 600 · −1%</div><div style="font-size:16px;font-weight:600;letter-spacing:-.01em">Грузчики на переезд</div></div>
+    <div class="trow"><div class="spec">Кнопка<br>16 · 700 (малая 14 · 700)</div><div style="font-size:16px;font-weight:700">Опубликовать вакансию</div></div>
+    <div class="trow"><div class="spec">Описание<br>15.5 / 1.6 · 400 · ink2</div><div style="font-size:15.5px;line-height:1.6;color:var(--ink2)">Встречать гостей, помогать с выбором и делать так, чтобы им захотелось вернуться.</div></div>
+    <div class="trow"><div class="spec">Вкладки, меню<br>15 · 600</div><div style="font-size:15px;font-weight:600">Вакансии &nbsp; <span style="color:var(--muted)">Подработка</span></div></div>
+    <div class="trow"><div class="spec">Текст отзыва<br>14.5 / 1.55 · 400 · ink2</div><div style="font-size:14.5px;line-height:1.55;color:var(--ink2)">Чаевые делятся честно, график всегда заранее.</div></div>
+    <div class="trow"><div class="spec">S · чипы 500, рейтинг 600<br>14</div><div style="font-size:14px">Рестораны и кафе · <b>4.8</b></div></div>
+    <div class="trow"><div class="spec">Мета<br>13.5 · 400 · muted</div><div style="font-size:13.5px;color:var(--muted)">2/2 · от 1 года · 1,2 км</div></div>
+    <div class="trow"><div class="spec">Подпись поля<br>13.5 · 600 · ink2</div><div style="font-size:13.5px;font-weight:600;color:var(--ink2)">Должность</div></div>
+    <div class="trow"><div class="spec">XS · подсказки<br>12.5 · 400 / 600</div><div style="font-size:12.5px;color:var(--muted)">Можно указать только «от»</div></div>
+    <div class="trow"><div class="spec">Статусы / факты<br>12 · 700 / 400</div><div style="font-size:12px;font-weight:700">Связались</div></div>
+    <div class="trow"><div class="spec">Таб-бар<br>11 · 500 · счётчик 10 · 700</div><div style="font-size:11px;font-weight:500">Главная · Компании · Сделки · Профиль</div></div>
+  </div>
+</section>
+
+<!-- ================= РАЗМЕРЫ ================= -->
+<section>
+  <h2>Размеры, отступы, скругления</h2>
+  <div class="lead">Шаг отступов кратен 2–4 px. Поля экрана — 20 px слева и справа.</div>
+  <div class="box tw"><table>
+    <tr><th>Элемент</th><th>Размер</th><th>Скругление</th><th>Отступы</th></tr>
+    <tr><td>Экран</td><td>ширина 390</td><td>—</td><td>сверху 18, по бокам 20, снизу 120 (под таб-бар)</td></tr>
+    <tr><td>Секция</td><td>—</td><td>—</td><td>заголовок: сверху 30, снизу 14</td></tr>
+    <tr><td>Строка поиска</td><td>высота 56</td><td>18</td><td>внутри 0 18, иконка 20</td></tr>
+    <tr><td>Чип</td><td>высота 38</td><td>999</td><td>0 16, между чипами 8</td></tr>
+    <tr><td>Вкладки</td><td>подчёркивание 2</td><td>2</td><td>между 22, под текстом 12</td></tr>
+    <tr><td>Кнопка</td><td>высота 54 (малая 42)</td><td>18 (малая 14)</td><td>0 18</td></tr>
+    <tr><td>Поле ввода</td><td>≈ 52</td><td>16</td><td>15, рамка 1</td></tr>
+    <tr><td>Карточка вакансии</td><td>—</td><td>22</td><td>18, между карточками 12; логотип 48 (r 16)</td></tr>
+    <tr><td>Карточка компании (топ)</td><td>ширина 280, обложка 150</td><td>26</td><td>обложка 16, низ 14 16 16; логотип 44; между 14</td></tr>
+    <tr><td>Обложка в профиле компании</td><td>высота 230 (в вакансии 190)</td><td>—</td><td>логотип 76 (в вакансии 68), r 22, белая рамка 4 цвета bg, заезжает на −38</td></tr>
+    <tr><td>Плитки фактов</td><td>3 в ряд</td><td>18</td><td>14 12, между 10</td></tr>
+    <tr><td>Блок статистики</td><td>3 колонки</td><td>22</td><td>16 8, разделители line</td></tr>
+    <tr><td>Панель / отзыв</td><td>—</td><td>24 / 20</td><td>18 / 16</td></tr>
+    <tr><td>Фото в ленте</td><td>150 × 118</td><td>16</td><td>между 8</td></tr>
+    <tr><td>Кнопка-звезда</td><td>46 × 46</td><td>14</td><td>между 8</td></tr>
+    <tr><td>Иконка-кнопка, аватар</td><td>42 × 42</td><td>круг</td><td>—</td></tr>
+    <tr><td>Таб-бар</td><td>высота 70</td><td>26</td><td>от краёв 16; кнопка ＋ 52 (r 18)</td></tr>
+    <tr><td>Нижний лист</td><td>ручка 40 × 5</td><td>30 сверху</td><td>12 20 30; пункты r 20, иконка 46 (r 14)</td></tr>
+    <tr><td>Тост</td><td>—</td><td>16</td><td>14 16, от низа 100</td></tr>
+    <tr><td>Галочка</td><td>16 × 16</td><td>круг</td><td>—</td></tr>
+    <tr><td>Иконки</td><td>22 (таб-бар), 20 (списки), 18 (мелкие)</td><td>—</td><td>контурные, толщина линии 1.8, как Lucide</td></tr>
+    <tr><td>Анимации</td><td colspan="3">экран: 0.22s, появление снизу на 6px · лист: 0.22s снизу на 40px · нажатие карточки: scale 0.985</td></tr>
+  </table></div>
+</section>
+
+<!-- ================= КОМПОНЕНТЫ ================= -->
+<section>
+  <h2>Компоненты</h2>
+  <div class="lead">Так компоненты выглядят в приложении. Параметры — под каждым.</div>
+  <div class="grid g3">
+
+    <div class="box"><div class="label">СТРОКА ПОИСКА</div>
+      <div class="searchbar">⌕ Должность или компания</div>
+      <div class="spec">h56 · r18 · card · тень · текст 16 muted</div></div>
+
+    <div class="box"><div class="label">ЧИПЫ</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap"><span class="chip on">Все</span><span class="chip">Рестораны и кафе</span><span class="chip">Ещё 17 ›</span></div>
+      <div class="spec">h38 · r999 · 14/500 · рамка #DAD8D2 · активный ink/белый</div></div>
+
+    <div class="box"><div class="label">ВКЛАДКИ</div>
+      <div class="tabs"><span class="on">Вакансии</span><span>Подработка</span></div>
+      <div class="spec">15/600 · muted → ink · линия 2px ink</div></div>
+
+    <div class="box"><div class="label">КНОПКИ</div>
+      <div style="display:grid;gap:8px"><button class="btn red">Опубликовать</button><button class="btn ink">Подписаться на вакансии</button><button class="btn line">Отмена</button>
+      <div style="display:flex;gap:10px"><button class="btn wa" style="flex:1">WhatsApp</button><button class="btn tg" style="flex:1">Telegram</button></div>
+      <div style="display:flex;gap:8px"><button class="btn sm line" style="flex:1">Нет</button><button class="btn sm ink" style="flex:1">Да</button></div></div>
+      <div class="spec">h54 r18 16/700 · малая h42 r14 14/700</div></div>
+
+    <div class="box"><div class="label">КАРТОЧКА ВАКАНСИИ</div>
+      <div class="job"><div style="display:flex;gap:14px;align-items:flex-start"><div class="logo" style="width:48px;height:48px;font-size:16px">TK</div>
+        <div style="flex:1"><div class="t">Официант</div><div class="co">Tash Kitchen <span class="tick">✓</span></div></div><span style="color:var(--heart-off)">♡</span></div>
+        <div class="sal">35 000 – 45 000 сом</div><div class="meta">2/2 · от 1 года · 1,2 км</div></div>
+      <div class="spec">r22 · p18 · логотип 48 r16 · зарплата отступ 14</div></div>
+
+    <div class="box"><div class="label">КАРТОЧКА КОМПАНИИ</div>
+      <div class="cocard"><div class="cover"><div class="mono">TK</div><span style="font-size:12.5px;font-weight:600;opacity:.85;position:relative">2 вакансии</span><div style="font-size:13px;font-weight:600;max-width:70%;position:relative">«Ищем людей, которые любят гостей»</div></div>
+        <div style="padding:14px 16px 16px;display:flex;gap:12px;align-items:center"><div class="logo" style="width:44px;height:44px;font-size:15px">TK</div><div style="flex:1"><div style="display:flex;gap:6px;align-items:center;font-weight:600">Tash Kitchen <span class="tick">✓</span></div><div style="font-size:12.5px;color:var(--muted)">Ресторан</div></div><span class="rating"><i>★</i>4.8</span></div></div>
+      <div class="spec">w280 · r26 · обложка 150 · логотип 44</div></div>
+
+    <div class="box"><div class="label">ПЛИТКИ ФАКТОВ</div>
+      <div class="facts"><div class="fact"><span>График</span><b>2/2</b></div><div class="fact"><span>Опыт</span><b>от 1 года</b></div><div class="fact"><span>Где</span><b>1,2 км</b></div></div>
+      <div class="spec">r18 · p14/12 · подпись 12 muted · значение 15/700</div></div>
+
+    <div class="box"><div class="label">СТАТИСТИКА</div>
+      <div class="stats"><div><b>120+</b><span>сотрудников</span></div><div><b>46</b><span>наняли здесь</span></div><div><b>2023</b><span>с Work KG</span></div></div>
+      <div class="spec">r22 · 20/800 · подпись 12 muted · разделитель line</div></div>
+
+    <div class="box"><div class="label">СТАТУСЫ И МЕТКИ</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap"><span class="status" style="background:var(--warn-bg);color:var(--warn)">Связались</span><span class="status" style="background:var(--gig-soft);color:var(--gig)">Договорились</span><span class="status" style="background:var(--brand-soft);color:var(--brand)">Оцените</span><span class="status" style="background:var(--track);color:var(--muted)">Завершено</span></div>
+      <div style="margin-top:12px;font-size:12.5px;font-weight:600;color:var(--ok)">✓ Подтверждено</div>
+      <div style="margin-top:4px;font-size:12.5px;font-weight:600;color:var(--dispute)">⚖️ Компания оспорила</div>
+      <div class="spec">статус 12/700 · p5 10 · r999</div></div>
+
+    <div class="box"><div class="label">ОЦЕНКА ЗВЁЗДАМИ</div>
+      <div class="stars"><span class="on">★</span><span class="on">★</span><span class="on">★</span><span class="on">★</span><span>★</span></div>
+      <div class="spec">46×46 · r14 · вкл #FDF5E2 / #E8A317 · выкл #F5F4F0 / #D4D2CC</div></div>
+
+    <div class="box"><div class="label">ПОЛЯ ВВОДА</div>
+      <div class="field"><label>Должность</label><div class="input">Бариста</div></div>
+      <div class="field" style="margin-top:12px"><div class="input focus">В фокусе</div></div>
+      <div class="field" style="margin-top:12px"><div class="input err">Опис</div><div class="hint err">Минимум 40 символов</div></div>
+      <div class="spec">r16 · p15 · 16px · рамка line → ink (фокус) → brand (ошибка)</div></div>
+
+    <div class="box"><div class="label">ЛЬГОТЫ</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap"><span class="perk">🍽 Питание</span><span class="perk">👔 Форма</span><span class="perk">💸 Чаевые</span></div>
+      <div class="spec">r12 · p9 12 · 14/500 · рамка line</div></div>
+
+    <div class="box"><div class="label">ПОДРАБОТКА</div>
+      <div class="gig"><div class="when">15:00<small>Сегодня</small></div><div style="flex:1"><div style="font-weight:600">Грузчики на переезд</div><div style="font-size:12.5px;color:var(--muted)">Айгерим К. · 0,8 км</div></div><b>1 500 сом</b></div>
+      <div class="spec">плитка времени 56×56 r16 gig-soft / gig</div></div>
+
+    <div class="box"><div class="label">ТАБ-БАР</div>
+      <div class="nav"><div class="on">⌂<span>Главная</span></div><div>▦<span>Компании</span></div><span class="fab">+</span><div>☑<span>Сделки</span><span class="badge">2</span></div><div>◯<span>Профиль</span></div></div>
+      <div class="spec">h70 · r26 · rgba(14,14,16,.94) + blur 14 · ＋ 52 r18 белая</div></div>
+
+    <div class="box"><div class="label">НИЖНИЙ ЛИСТ</div>
+      <div class="sheet"><div class="grab"></div><div style="font-size:20px;font-weight:700;letter-spacing:-.02em">Что публикуем?</div>
+        <div class="opt" style="margin-top:10px"><div class="ic">▣</div><div><b style="display:block;font-size:16px">Вакансия</b><span style="font-size:13.5px;color:var(--muted)">Ищу сотрудника в штат</span></div></div></div>
+      <div class="spec">r30 сверху · ручка 40×5 · пункт r20 p16 · иконка 46 r14</div></div>
+
+    <div class="box"><div class="label">ТОСТ</div>
+      <div class="toast">Вакансия отправлена на модерацию</div>
+      <div class="spec">ink · r16 · p14 16 · 14px · 2.3 сек</div></div>
+
+  </div>
+</section>
+
+<!-- ================= CSS ================= -->
+<section>
+  <h2>CSS-токены</h2>
+  <div class="lead">Скопируйте в проект — цвета и шрифт совпадут с прототипом.</div>
+<pre>@import url('https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700;800&amp;display=swap');
+
+:root{
+  --bg:#F6F5F2;  --card:#FFFFFF;  --ink:#0E0E10;  --ink2:#3F3F46;  --muted:#8A8A93;
+  --line:#ECEBE6;  --chip-border:#DAD8D2;  --soft:#F5F4F0;  --track:#F1F0EC;
+  --brand:#B4161B;  --brand-soft:#FBEDED;
+  --ok:#0E9F6E;  --ok-soft:#E8F6EF;  --tick:#1D9BF0;
+  --gig:#5B4BDB;  --gig-soft:#EFEDFD;
+  --star:#E8A317;  --star-bg:#FDF5E2;  --star-off:#D4D2CC;
+  --warn-bg:#FEF3C7;  --warn:#92400E;  --dispute:#B45309;
+  --wa:#128C7E;  --tg:#229ED9;  --nav-off:#7B7B84;  --heart-off:#C7C5BF;
+
+  --sh:0 1px 2px rgba(14,14,16,.04), 0 10px 30px rgba(14,14,16,.06);
+  --sh-nav:0 14px 40px rgba(14,14,16,.3);
+
+  --font:Onest, Inter, system-ui, sans-serif;
+  --r-chip:999px; --r-btn:18px; --r-btn-sm:14px; --r-input:16px;
+  --r-card:22px; --r-panel:24px; --r-cocard:26px; --r-sheet:30px;
+  --pad-screen:20px;
+}
+body{ font-family:var(--font); background:var(--bg); color:var(--ink); -webkit-font-smoothing:antialiased; }
+
+h1{ font-size:30px; line-height:1.08; font-weight:800; letter-spacing:-.035em; }
+h2{ font-size:20px; font-weight:700; letter-spacing:-.02em; }
+h3{ font-size:16px; font-weight:600; letter-spacing:-.01em; }</pre>
+</section>
+
+</div>
+</body>
+</html>

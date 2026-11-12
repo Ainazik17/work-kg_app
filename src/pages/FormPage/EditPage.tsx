@@ -4,6 +4,7 @@ import imageCompression from 'browser-image-compression'
 import { VacancyForm } from './VacancyForm'
 import { ResumeForm } from './ResumeForm'
 import { useToast } from '../../../App'
+import { Loader, ScreenHeader } from '../../ui/wk'
 import {
 	useGetCitiesQuery,
 	useGetSpheresQuery,
@@ -197,32 +198,16 @@ const EditPage: React.FC<{ telegramId: number }> = ({ telegramId }) => {
 
 	const isLoading = isVac ? vacLoading : resLoading
 
-	if (isLoading || !initialData) {
-		return (
-			<div className='min-h-screen flex items-center justify-center bg-main'>
-				<div className='w-10 h-10 border-4 border-red-700 border-t-transparent rounded-full animate-spin' />
-			</div>
-		)
-	}
+	if (isLoading || !initialData) return <Loader />
 
 	return (
-		<div className='bg-main min-h-screen pb-32 animate-in fade-in duration-300'>
-			<header
-				className='p-6 flex items-center gap-4 sticky top-0 bg-main/90 backdrop-blur-md z-40 border-b border-white/5'
-				style={{ paddingTop: 'calc(var(--sat) + 1rem)' }}
-			>
-				<button
-					onClick={() => navigate(-1)}
-					className='w-10 h-10 bg-secondary rounded-xl flex items-center justify-center text-main active:scale-95 transition-transform'
-				>
-					←
-				</button>
-				<h2 className='text-2xl font-black text-main tracking-tight'>
-					Редактировать
-				</h2>
-			</header>
+		<div className='wk-screen wk-enter text-left'>
+			<ScreenHeader
+				title={isVac ? 'Редактировать вакансию' : 'Редактировать резюме'}
+				onBack={() => navigate(-1)}
+			/>
 
-			<div className='p-6'>
+			<div>
 				{isVac ? (
 					<VacancyForm
 						telegramId={telegramId}
@@ -255,17 +240,16 @@ const EditPage: React.FC<{ telegramId: number }> = ({ telegramId }) => {
 					/>
 				)}
 
-				{/* Системный лоадер */}
 				{isSubmitting && (
-					<div className='fixed inset-0 z-[200] flex items-center justify-center p-6 bg-black/60 backdrop-blur-sm animate-in fade-in'>
-						<div className='bg-main border border-white/10 p-8 rounded-[2.5rem] shadow-2xl flex flex-col items-center w-full max-w-[280px]'>
-							<div className='relative w-16 h-16 mb-6'>
-								<div className='absolute inset-0 border-4 border-secondary rounded-full'></div>
-								<div className='absolute inset-0 border-4 border-t-red-700 rounded-full animate-spin'></div>
-							</div>
-							<h3 className='text-main text-lg font-black uppercase italic tracking-tighter'>
+					<div
+						className='fixed inset-0 z-[200] flex items-center justify-center p-6'
+						style={{ background: 'rgba(14,14,16,.5)' }}
+					>
+						<div className='wk-panel flex flex-col items-center' style={{ width: 240, padding: 26 }}>
+							<span className='wk-spinner wk-spinner--lg' />
+							<div className='wk-h3' style={{ marginTop: 16 }}>
 								{statusText}
-							</h3>
+							</div>
 						</div>
 					</div>
 				)}

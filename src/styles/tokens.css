@@ -1,0 +1,26 @@
+/* Work KG — дизайн-токены. Источник: прототип workkg-v2. */
+@import url('https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700;800&display=swap');
+
+:root{
+  --bg:#F6F5F2;  --card:#FFFFFF;  --ink:#0E0E10;  --ink2:#3F3F46;  --muted:#8A8A93;
+  --line:#ECEBE6;  --chip-border:#DAD8D2;  --soft:#F5F4F0;  --track:#F1F0EC;
+  --brand:#B4161B;  --brand-soft:#FBEDED;
+  --ok:#0E9F6E;  --ok-soft:#E8F6EF;  --tick:#1D9BF0;
+  --gig:#5B4BDB;  --gig-soft:#EFEDFD;
+  --star:#E8A317;  --star-bg:#FDF5E2;  --star-off:#D4D2CC;
+  --warn-bg:#FEF3C7;  --warn:#92400E;  --dispute:#B45309;
+  --wa:#128C7E;  --tg:#229ED9;  --nav-off:#7B7B84;  --heart-off:#C7C5BF;
+
+  --sh:0 1px 2px rgba(14,14,16,.04), 0 10px 30px rgba(14,14,16,.06);
+  --sh-nav:0 14px 40px rgba(14,14,16,.3);
+
+  --font:Onest, Inter, system-ui, sans-serif;
+  --r-chip:999px; --r-btn:18px; --r-btn-sm:14px; --r-input:16px;
+  --r-card:22px; --r-panel:24px; --r-cocard:26px; --r-sheet:30px;
+  --pad-screen:20px;
+}
+body{ font-family:var(--font); background:var(--bg); color:var(--ink); -webkit-font-smoothing:antialiased; }
+
+h1{ font-size:30px; line-height:1.08; font-weight:800; letter-spacing:-.035em; }
+h2{ font-size:20px; font-weight:700; letter-spacing:-.02em; }
+h3{ font-size:16px; font-weight:600; letter-spacing:-.01em; }

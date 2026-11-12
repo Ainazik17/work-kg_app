@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import imageCompression from 'browser-image-compression'
 import { useToast } from '../../../App'
+import { Loader, ScreenHeader } from '../../ui/wk'
 import { VacancyForm } from './VacancyForm'
 import { ResumeForm } from './ResumeForm'
 import {
@@ -10,6 +11,7 @@ import {
 	useCreateVacancyMutation,
 	useCreateResumeMutation,
 	useUploadMediaBatchMutation,
+	useApplyToVacancyMutation,
 } from '../../store/store'
 
 const tg = (window as any).Telegram?.WebApp
@@ -19,7 +21,8 @@ const CreatePage: React.FC<{ telegramId: number }> = ({ telegramId }) => {
 	const location = useLocation()
 	const { showToast } = useToast()
 
-	const { type } = location.state || { type: 'vac' }
+	const { type, applyTo } = location.state || { type: 'vac' }
+	const [applyToVacancy] = useApplyToVacancyMutation()
 	const isVac = type === 'vac' || type === 'job'
 
 	const { data: cities = [], isLoading: isStaticLoading } =
@@ -124,6 +127,17 @@ const CreatePage: React.FC<{ telegramId: number }> = ({ telegramId }) => {
 			}
 
 			tg.HapticFeedback.notificationOccurred('success')
+			// Пришли из «Откликнуться резюме» без резюме: отклик уходит сразу после создания
+			if (!isVac && applyTo) {
+				try {
+					await applyToVacancy({ tid: telegramId, vacancyId: Number(applyTo), resumeId: res.id }).unwrap()
+					showToast('Резюме создано и отклик отправлен')
+				} catch (err: any) {
+					showToast(err?.data?.message || 'Резюме создано, но отклик не отправился', 'error')
+				}
+				navigate(`/detail/${applyTo}?type=job`, { replace: true })
+				return
+			}
 			showToast('Успешно опубликовано! 🚀')
 			navigate('/profile')
 		} catch (e) {
@@ -134,29 +148,21 @@ const CreatePage: React.FC<{ telegramId: number }> = ({ telegramId }) => {
 		}
 	}
 
-	if (isStaticLoading) {
-		return (
-			<div className='min-h-screen flex items-center justify-center bg-main'>
-				<div className='w-10 h-10 border-4 border-red-700 border-t-transparent rounded-full animate-spin' />
-			</div>
-		)
-	}
+	if (isStaticLoading) return <Loader />
 
 	return (
-		<div className='bg-main min-h-screen pb-32 animate-in fade-in'>
-			<header className='p-6 pt-[calc(var(--sat)+1rem)] flex items-center gap-4 sticky top-0 bg-main/90 backdrop-blur-md z-40 border-b border-white/5'>
-				<button
-					onClick={() => navigate(-1)}
-					className='w-10 h-10 bg-secondary rounded-xl flex items-center justify-center text-main'
-				>
-					←
-				</button>
-				<h2 className='text-2xl font-black text-main leading-tight'>
-					{isVac ? 'Новая вакансия' : 'Новое резюме'}
-				</h2>
-			</header>
+		<div className='wk-screen wk-enter text-left'>
+			<ScreenHeader
+				title={isVac ? 'Вакансия' : 'Резюме за 60 секунд'}
+				subtitle={
+					isVac
+						? 'Вакансии с зарплатой и понятным описанием получают в 3 раза больше откликов.'
+						: 'Работодатели увидят его в поиске сотрудников и смогут написать вам.'
+				}
+				onBack={() => navigate(-1)}
+			/>
 
-			<div className='p-6'>
+			<div>
 				{isVac ? (
 					<VacancyForm
 						telegramId={telegramId}
@@ -184,15 +190,15 @@ const CreatePage: React.FC<{ telegramId: number }> = ({ telegramId }) => {
 				)}
 
 				{isSubmitting && (
-					<div className='fixed inset-0 z-[200] flex items-center justify-center p-6 bg-black/60 backdrop-blur-sm animate-in fade-in'>
-						<div className='bg-main border border-white/10 p-8 rounded-[2.5rem] shadow-2xl flex flex-col items-center w-full max-w-[280px]'>
-							<div className='w-16 h-16 mb-6 relative'>
-								<div className='absolute inset-0 border-4 border-secondary rounded-full'></div>
-								<div className='absolute inset-0 border-4 border-t-red-700 rounded-full animate-spin'></div>
-							</div>
-							<h3 className='text-main text-lg font-black uppercase italic tracking-tighter'>
+					<div
+						className='fixed inset-0 z-[200] flex items-center justify-center p-6'
+						style={{ background: 'rgba(14,14,16,.5)' }}
+					>
+						<div className='wk-panel flex flex-col items-center' style={{ width: 240, padding: 26 }}>
+							<span className='wk-spinner wk-spinner--lg' />
+							<div className='wk-h3' style={{ marginTop: 16 }}>
 								{statusText}
-							</h3>
+							</div>
 						</div>
 					</div>
 				)}

@@ -14,18 +14,73 @@ import {
 	useLocation,
 	Navigate,
 	useSearchParams,
+	useParams,
 } from 'react-router-dom'
 import {
 	Home,
 	Search,
+	Building2,
+	Heart,
+	Share,
+	BellRing,
 	Plus,
 	Star,
 	ChevronRight,
+	ChevronDown,
 	Zap,
 	Gamepad2,
-	Lock,
-	ArrowRight,
+	Gem,
+	Gift,
+	User as UserLucide,
+	Bell,
+	BriefcaseBusiness,
+	FileText,
+	Eye,
+	EyeOff,
+	Pencil,
+	Trash2,
+	MapPin,
+	MousePointerClick,
+	Copy,
+	Send,
+	Check,
+	Rocket,
+	Settings,
+	Wallet,
+	Wrench,
 } from 'lucide-react'
+import {
+	Avatar,
+	Button,
+	Chip,
+	EmptyState,
+	JobCard,
+	Loader,
+	MenuList,
+	Panel,
+	ScreenHeader,
+	SectionHead,
+	Segmented,
+	Sheet,
+	SheetOption,
+	Skeleton,
+	StatsBlock,
+	StatusPill,
+	Tabs,
+	IconButton,
+	GigRow,
+	distanceText,
+	gigDayLabel,
+	gigTime,
+	payText,
+	cx,
+	fmtMoney,
+	fmtNum,
+	haptic as wkHaptic,
+	plural,
+	yearsText,
+} from './src/ui/wk'
+import { ListingView } from './src/ui/ListingView'
 import { BANK_SERVICES, formatPhoneKG, formatDate } from './constants'
 import { User, Media, Vacancy, Resume } from './types'
 import { GamesPage } from './src/pages/games/ui/GamesPage'
@@ -63,8 +118,42 @@ import {
 	useGetReferralInfoQuery,
 	useBoostVacancyMutation,
 	useBoostResumeMutation,
+	useGetGigsQuery,
+	useGetOffersQuery,
+	useGetMyGigsQuery,
+	useGetMyOfferQuery,
+	useGetCompaniesQuery,
+	useGetMyCompanyQuery,
+	useGetFollowedCompaniesQuery,
+	useGetCompanyByVacancyQuery,
+	useGetMyApplicationsQuery,
+	useGetApplicationCountsQuery,
+	useGetTopGigCustomersQuery,
+	useGetSavedIdsQuery,
+	useGetDealsPendingQuery,
 } from './src/store/store'
 import { GeoPromoCard } from './src/pages/GoPromoCard'
+import { UiKit } from './src/pages/UiKit'
+import GigFormPage from './src/pages/gigs/GigFormPage'
+import OfferFormPage from './src/pages/gigs/OfferFormPage'
+import GigPage from './src/pages/gigs/GigPage'
+import OfferPage from './src/pages/gigs/OfferPage'
+import CompaniesPage from './src/pages/companies/CompaniesPage'
+import CompanyPage from './src/pages/companies/CompanyPage'
+import CompanyFormPage from './src/pages/companies/CompanyFormPage'
+import FollowingPage from './src/pages/companies/FollowingPage'
+import { CompanyCardWide, GigCustomerCard } from './src/ui/company'
+import ApplicationPage from './src/pages/applications/ApplicationPage'
+import ApplicantsPage from './src/pages/applications/ApplicantsPage'
+import MyApplicationsPage from './src/pages/applications/MyApplicationsPage'
+import { ApplySheet } from './src/pages/applications/ApplySheet'
+import { STATUS_APPLICANT } from './src/pages/applications/status'
+import SavedPage from './src/pages/me/SavedPage'
+import DealsPage from './src/pages/deals/DealsPage'
+import ReviewPage from './src/pages/deals/ReviewPage'
+import NotifySettingsPage from './src/pages/me/NotifySettingsPage'
+import { SaveHeart } from './src/ui/save'
+import { shareListing } from './src/ui/contact'
 
 const tg = (window as any).Telegram?.WebApp
 
@@ -113,7 +202,7 @@ const ToastProvider: React.FC<{ children: React.ReactNode }> = ({
 	const showToast = useCallback(
 		(message: string, type: 'success' | 'error' | 'info' = 'success') => {
 			setToast({ message, type })
-			setTimeout(() => setToast(null), 3000)
+			setTimeout(() => setToast(null), 2300)
 			if (tg?.HapticFeedback) {
 				tg.HapticFeedback.notificationOccurred(
 					type === 'error' ? 'error' : 'success',
@@ -127,17 +216,20 @@ const ToastProvider: React.FC<{ children: React.ReactNode }> = ({
 		<ToastContext.Provider value={{ showToast }}>
 			{children}
 			{toast && (
-				<div className='fixed top-14 left-1/2 -translate-x-1/2 z-[200] w-[85%] max-w-sm animate-in fade-in slide-in-from-top-4 duration-300'>
-					<div
-						className={`px-6 py-4 rounded-[2rem] shadow-2xl flex items-center justify-center font-bold text-sm backdrop-blur-md ${
-							toast.type === 'success'
-								? 'bg-emerald-600/90 text-white'
-								: toast.type === 'error'
-									? 'bg-rose-600/90 text-white'
-									: 'bg-slate-800/90 text-white'
-						}`}
-					>
-						{toast.message}
+				<div className='wk-toast' role='status' aria-live='polite'>
+					<div className='wk-toast__box' key={toast.message}>
+						{toast.type !== 'info' && (
+							<span
+								className='wk-toast__dot'
+								style={{
+									background:
+										toast.type === 'error'
+											? 'var(--brand)'
+											: 'var(--ok)',
+								}}
+							/>
+						)}
+						<span>{toast.message}</span>
 					</div>
 				</div>
 			)}
@@ -293,32 +385,30 @@ export const AddressAutocomplete2GIS: React.FC<{
 	}
 
 	return (
-		<div className='relative space-y-2'>
-			<label className='text-[10px] font-black text-slate-400 uppercase tracking-widest px-1 text-left block'>
-				Адрес (Поиск по Кыргызстану)
-			</label>
+		<div className='wk-field relative'>
+			<label className='wk-label'>Адрес</label>
 			<div className='relative'>
 				<input
 					value={query}
 					onChange={(e) => handleSearch(e.target.value)}
-					placeholder='Улица, дом или название...'
-					className='w-full bg-slate-50 border border-slate-100 h-14 pl-12 pr-6 rounded-2xl text-sm font-bold focus:outline-none ring-2 ring-transparent focus:ring-emerald-50 focus:border-emerald-200 transition-all text-slate-900'
+					placeholder='Улица, дом или название'
+					className='wk-input'
+					style={{ paddingLeft: 44, paddingRight: 40 }}
 				/>
-				<div className='absolute left-4 top-1/2 -translate-y-1/2 text-slate-400'>
-					{/* Иконка карты */}
-					<svg className='w-5 h-5' fill='none' viewBox='0 0 24 24'>
-						<path
-							fill='#3B82F6'
-							d='M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5z'
-						/>
-					</svg>
-				</div>
+				<MapPin
+					size={20}
+					strokeWidth={1.8}
+					className='absolute left-[14px] top-1/2 -translate-y-1/2'
+					style={{ color: 'var(--muted)' }}
+				/>
 				{loading && (
-					<div className='absolute right-4 top-1/2 -translate-y-1/2'>
-						<div className='w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin'></div>
-					</div>
+					<span
+						className='wk-spinner absolute right-[14px] top-1/2 -translate-y-1/2'
+						style={{ width: 16, height: 16, borderWidth: 2, color: 'var(--muted)', marginTop: -8 }}
+					/>
 				)}
 			</div>
+			<p className='wk-hint'>Поиск по Кыргызстану</p>
 
 			{isOpen && suggestions.length > 0 && (
 				<>
@@ -326,24 +416,18 @@ export const AddressAutocomplete2GIS: React.FC<{
 						className='fixed inset-0 z-[60]'
 						onClick={() => setIsOpen(false)}
 					/>
-					<div className='absolute top-full left-0 right-0 mt-2 bg-white border border-slate-100 rounded-2xl shadow-xl z-[70] overflow-hidden max-h-60 overflow-y-auto animate-in fade-in zoom-in-95 duration-200'>
+					<div className='wk-dropdown' style={{ top: 92, zIndex: 70 }}>
 						{suggestions.map((item) => (
 							<button
+								type='button'
 								key={item.id}
 								onClick={() => handleSelect(item)}
-								className='w-full text-left p-4 border-b border-slate-50 hover:bg-blue-50 transition-colors flex flex-col last:border-0'
+								className='wk-dropdown__item flex-col !items-start !gap-0.5'
 							>
-								<span className='font-bold text-sm text-slate-900 leading-tight mb-1'>
-									{item.name}
-								</span>
-								<span className='text-[10px] text-slate-400 font-medium leading-tight'>
-									{item.address_name}
-								</span>
+								<span style={{ fontWeight: 600 }}>{item.name}</span>
+								<span className='wk-xs'>{item.address_name}</span>
 							</button>
 						))}
-						<div className='p-2 bg-slate-50 text-[9px] text-center text-slate-400 font-bold uppercase'>
-							OpenStreetMap (KG)
-						</div>
 					</div>
 				</>
 			)}
@@ -416,7 +500,7 @@ export const ElegantSelect: React.FC<{
 		if (!icon) return null
 		const isUrl = icon.startsWith('http') || icon.startsWith('data:')
 		return (
-			<div className='w-8 h-8 flex items-center justify-center shrink-0 overflow-hidden rounded-lg'>
+			<span className='w-6 h-6 flex items-center justify-center shrink-0 overflow-hidden rounded-md'>
 				{isUrl ? (
 					<img
 						src={icon}
@@ -424,79 +508,72 @@ export const ElegantSelect: React.FC<{
 						className='w-full h-full object-contain'
 					/>
 				) : (
-					<span className='text-xl'>{icon}</span>
+					<span style={{ fontSize: 18 }}>{icon}</span>
 				)}
-			</div>
+			</span>
 		)
 	}
 
 	return (
 		<div
-			className={`relative w-full ${disabled ? 'opacity-50 grayscale pointer-events-none' : ''}`}
+			className='relative w-full text-left'
+			style={disabled ? { opacity: 0.4, pointerEvents: 'none' } : undefined}
 		>
-			{label && (
-				<label className='block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 px-1 text-left'>
-					{label}
-				</label>
-			)}
+			{label && <label className='wk-label'>{label}</label>}
 			<button
 				type='button'
 				onClick={() => !disabled && setIsOpen(!isOpen)}
-				className={`w-full flex items-center justify-between p-4 bg-white border rounded-2xl shadow-sm active:bg-slate-50 transition-all ${isOpen ? 'border-red-100 ring-4 ring-red-50/30' : 'border-slate-100'}`}
+				className={cx('wk-select', isOpen && 'is-open')}
 			>
-				<div className='flex items-center gap-3 overflow-hidden'>
-					{selectedOption &&
-						renderIcon(selectedOption.icon, selectedOption.name)}
-					<span
-						className={`font-bold text-sm truncate ${selectedOption ? 'text-slate-900' : 'text-slate-400'}`}
-					>
-						{selectedOption ? selectedOption.name : placeholder}
-					</span>
-				</div>
-				<svg
-					className={`w-5 h-5 text-red-700 shrink-0 transition-transform ${isOpen ? 'rotate-180' : ''}`}
-					fill='none'
-					stroke='currentColor'
-					viewBox='0 0 24 24'
+				{selectedOption &&
+					renderIcon(selectedOption.icon, selectedOption.name)}
+				<span
+					className={cx('wk-select__value', !selectedOption && 'is-empty')}
 				>
-					<path
-						strokeLinecap='round'
-						strokeLinejoin='round'
-						strokeWidth='2.5'
-						d='M19 9l-7 7-7-7'
-					/>
-				</svg>
+					{selectedOption ? selectedOption.name : placeholder || 'Выберите'}
+				</span>
+				<ChevronDown
+					size={18}
+					strokeWidth={1.8}
+					style={{
+						color: 'var(--muted)',
+						flexShrink: 0,
+						transition: 'transform .2s',
+						transform: isOpen ? 'rotate(180deg)' : undefined,
+					}}
+				/>
 			</button>
 
 			{isOpen && (
 				<>
 					<div
-						className='fixed inset-0 z-[160] bg-black/5'
+						className='fixed inset-0 z-[160]'
 						onClick={() => setIsOpen(false)}
 					/>
-					<div className='absolute top-full left-0 right-0 mt-2 z-[170] bg-white border border-slate-100 rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200 max-h-60 overflow-y-auto no-scrollbar'>
-						{options.map((opt) => (
-							<button
-								key={opt.id}
-								onClick={() => {
-									onChange(opt.id)
-									setIsOpen(false)
-								}}
-								className={`w-full flex items-center gap-4 p-4 text-left border-b border-slate-50 last:border-0 active:bg-red-50 ${String(value) === String(opt.id) ? 'bg-red-50/30' : ''}`}
-							>
-								{renderIcon(opt.icon, opt.name)}
-								<span
-									className={`font-bold text-sm flex-1 ${String(value) === String(opt.id) ? 'text-red-700' : 'text-slate-700'}`}
+					<div className='wk-dropdown'>
+						{options.map((opt) => {
+							const active = String(value) === String(opt.id)
+							return (
+								<button
+									type='button'
+									key={opt.id}
+									onClick={() => {
+										onChange(opt.id)
+										setIsOpen(false)
+									}}
+									className={cx(
+										'wk-dropdown__item',
+										active && 'is-active',
+									)}
 								>
-									{opt.name}
-								</span>
-								{String(value) === String(opt.id) && (
-									<span className='ml-auto text-red-700 font-bold text-lg'>
-										✓
-									</span>
-								)}
-							</button>
-						))}
+									{renderIcon(opt.icon, opt.name)}
+									<span className='flex-1'>{opt.name}</span>
+									{active && (
+										<Check size={18} strokeWidth={2} />
+									)}
+								</button>
+							)
+						})}
 					</div>
 				</>
 			)}
@@ -504,46 +581,91 @@ export const ElegantSelect: React.FC<{
 	)
 }
 
-const BottomSheet = ({ isOpen, onClose, title, children }: any) => {
-	if (!isOpen) return null
-	return (
-		<div className='fixed inset-0 z-[100] flex items-end justify-center animate-in fade-in duration-300'>
-			<div
-				className='absolute inset-0 bg-black/60 backdrop-blur-sm'
-				onClick={onClose}
-			></div>
-			<div className='relative w-full max-w-xl bg-main rounded-t-[3rem] p-8 shadow-2xl animate-in slide-in-from-bottom duration-500 fill-mode-both'>
-				<div className='w-12 h-1.5 bg-secondary rounded-full mx-auto mb-8 opacity-40'></div>
-				<div className='flex items-center justify-between mb-8'>
-					<h2 className='text-2xl font-black text-main'>{title}</h2>
-					<button
-						onClick={onClose}
-						className='p-2 bg-secondary rounded-full text-main'
-					>
-						Закрыть
-					</button>
-				</div>
-				<div className='space-y-4'>{children}</div>
-			</div>
-		</div>
-	)
-}
-
-const FormField: React.FC<{ label: string; children: React.ReactNode }> = ({
-	label,
-	children,
-}) => (
-	<div className='space-y-2'>
-		<label className='text-[10px] font-black text-slate-400 uppercase tracking-widest px-1 text-left block'>
-			{label}
-		</label>
+const FormField: React.FC<{
+	label: string
+	hint?: string
+	error?: string
+	children: React.ReactNode
+}> = ({ label, hint, error, children }) => (
+	<div className='wk-field text-left'>
+		<label className='wk-label'>{label}</label>
 		{children}
+		{error ? (
+			<p className='wk-error'>{error}</p>
+		) : hint ? (
+			<p className='wk-hint'>{hint}</p>
+		) : null}
 	</div>
 )
+
+const greeting = () => {
+	const h = new Date().getHours()
+	if (h >= 5 && h < 12) return 'Доброе утро'
+	if (h >= 12 && h < 18) return 'Добрый день'
+	return 'Добрый вечер'
+}
+
+/** Пропсы JobCard из вакансии/резюме — поля API не меняем */
+export const listingCardProps = (item: any, type: 'job' | 'worker') => {
+	const isJob = type !== 'worker'
+	const badge = item.boosted ? (
+		<StatusPill tone='warn'>⚡ ТОП</StatusPill>
+	) : item.free ? (
+		<StatusPill tone='ok'>Бесплатно</StatusPill>
+	) : undefined
+	if (isJob)
+		return {
+			title: item.title,
+			company: (
+				<span className='truncate'>
+					{item.companyName || item.company || 'Частное лицо'}
+				</span>
+			),
+			logoName: item.companyName || item.title,
+			logoSrc: item.logo || null,
+			salary: item.salary ? String(item.salary) : 'Договорная',
+			// Сердечко справа, бейдж ТОП/Бесплатно — под ним
+			right: item.id ? (
+				<div className='flex flex-col items-end' style={{ gap: 4 }}>
+					<SaveHeart vacancyId={item.id} />
+					{badge}
+				</div>
+			) : undefined,
+			meta: [
+				item.schedule,
+				item.experienceInYear != null
+					? yearsText(item.experienceInYear)
+					: null,
+				item.distanceKm != null
+					? `${String(Number(item.distanceKm).toFixed(1)).replace('.', ',')} км`
+					: item.cityName || item.location,
+			],
+			badge,
+		}
+	return {
+		title: item.name,
+		company: (
+			<span className='truncate'>
+				{[item.categoryName, item.subcategoryName]
+					.filter(Boolean)
+					.join(' · ') || 'Резюме'}
+			</span>
+		),
+		logoName: item.name,
+		logoSrc: item.media?.[0]?.fileUrl || null,
+		avatar: true,
+		salary: Number(item.experience)
+			? `${item.experience} ${plural(Number(item.experience), ['год', 'года', 'лет'])} опыта`
+			: 'Без опыта',
+		meta: [item.age ? `${item.age} лет` : null, item.cityName],
+		badge,
+	}
+}
 
 const HomePage: React.FC<{ user: User | null }> = ({ user }: any) => {
 	const navigate = useNavigate()
 	const telegramId = user?.telegramId || 0
+	const tgUser = tg?.initDataUnsafe?.user
 	const { data: recommendations = [], isLoading } =
 		useGetRecommendedVacanciesQuery(
 			{ tid: telegramId, limit: 10 },
@@ -569,70 +691,70 @@ const HomePage: React.FC<{ user: User | null }> = ({ user }: any) => {
 		navigate(path, { state })
 	}
 
-	return (
-		<div className='pb-40 animate-in fade-in duration-500 bg-main min-h-screen safe-top'>
-			<header className='px-6 pb-4 pt-4 flex items-center justify-between sticky top-0 bg-main/80 backdrop-blur-xl z-40 border-b border-white/5'>
-				<div className='flex items-center gap-2 font-black text-2xl tracking-tighter'>
-					<span className='text-main'>WORK</span>
-					<span className='text-red-700'>KG</span>
-				</div>
-			</header>
-			{/* Bento Action Cards */}
-			<div className='px-6 mt-6 space-y-4 text-left'>
-				<div
-					onClick={() => handleAction('/create', 'medium')}
-					className='brand-gradient p-7 rounded-[2.5rem] text-white shadow-2xl shadow-red-900/10 active:scale-[0.98] transition-all relative overflow-hidden cursor-pointer'
-				>
-					<div className='relative z-10'>
-						<h3 className='text-2xl font-black uppercase tracking-tight'>
-							Начни поиск 🚀
-						</h3>
-						<p className='text-[11px] text-white/80 font-bold uppercase mt-2 tracking-widest flex items-center gap-2'>
-							Создай резюме за 60 секунд <ArrowRight size={12} />
-						</p>
-					</div>
-					<Zap className='absolute -right-6 -bottom-6 w-36 h-36 text-white/10 rotate-12' />
-				</div>
+	const firstName = user?.firstName || tgUser?.first_name || 'Гость'
+	const [homeParams, setHomeParams] = useSearchParams()
+	const homeTab = homeParams.get('tab') === 'gigs' ? 'gigs' : 'jobs'
 
-				<div className='grid grid-cols-2 gap-4'>
-					<div
-						onClick={() => handleAction('/games')}
-						className='bg-indigo-600 p-6 rounded-[2.2rem] text-white shadow-lg h-36 flex flex-col justify-between relative overflow-hidden cursor-pointer active:scale-95 transition-all'
-					>
-						<div className='w-10 h-10 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-md'>
-							<Gamepad2 size={20} />
-						</div>
-						<div>
-							<h4 className='font-black text-sm uppercase'>
-								PLAY ZONE
-							</h4>
-							<p className='text-[9px] text-indigo-200 font-bold uppercase mt-1'>
-								Отдохни от работы
-							</p>
-						</div>
-					</div>
-					<div
-						onClick={() => handleAction('/subscription')}
-						className='bg-secondary p-6 rounded-[2.2rem] text-main border border-white/10 shadow-lg h-36 flex flex-col justify-between relative overflow-hidden cursor-pointer active:scale-95 transition-all'
-					>
-						<div className='w-10 h-10 bg-red-700 rounded-2xl flex items-center justify-center text-white'>
-							<Lock size={20} />
-						</div>
-						<div>
-							<h4 className='font-black text-sm uppercase'>
-								PRO ДОСТУП
-							</h4>
-							<p className='text-[9px] text-hint font-bold uppercase mt-1'>
-								Открой контакты
-							</p>
-						</div>
+	return (
+		<div className='wk-screen wk-enter text-left'>
+			{/* Шапка */}
+			<header className='flex items-center' style={{ gap: 10 }}>
+				<Avatar
+					name={firstName}
+					src={tgUser?.photo_url}
+					size={42}
+					onClick={() => handleAction('/profile')}
+				/>
+				<div className='flex-1 min-w-0'>
+					<div className='wk-xs'>{greeting()}</div>
+					<div className='truncate' style={{ fontWeight: 600 }}>
+						{firstName}
 					</div>
 				</div>
-			</div>
-			{/* Spheres Horizontal Scroll */}
-			<div className='overflow-x-auto no-scrollbar flex gap-4 px-6 mb-8 mt-10'>
+				<IconButton
+					label='PRO доступ'
+					onClick={() => handleAction('/subscription')}
+				>
+					<Gem size={20} strokeWidth={1.8} />
+				</IconButton>
+			</header>
+
+			<h1 className='wk-h1' style={{ marginTop: 26 }}>
+				Работа в лучших
+				<br />
+				местах Бишкека
+			</h1>
+
+			<button
+				className='wk-search'
+				style={{ marginTop: 20 }}
+				onClick={() => handleAction('/search')}
+			>
+				<Search size={20} strokeWidth={1.8} />
+				<span className='wk-search__ph'>Должность или компания</span>
+			</button>
+
+			<Tabs
+				className='mt-[22px]'
+				value={homeTab}
+				onChange={(v) => setHomeParams(v === 'gigs' ? { tab: 'gigs' } : {}, { replace: true })}
+				items={[
+					{ value: 'jobs', label: 'Вакансии' },
+					{ value: 'gigs', label: 'Подработка' },
+				]}
+			/>
+
+			{homeTab === 'gigs' ? (
+				<GigsTab telegramId={telegramId} />
+			) : (
+			<>
+			{/* Сферы */}
+			<div className='wk-chiprow' style={{ marginTop: 16 }}>
+				<Chip active onClick={() => handleAction('/search')}>
+					Все
+				</Chip>
 				{spheres.map((s) => (
-					<div
+					<Chip
 						key={s.id}
 						onClick={() =>
 							handleAction('/search', 'light', {
@@ -640,112 +762,260 @@ const HomePage: React.FC<{ user: User | null }> = ({ user }: any) => {
 								cityId: 1, // Берем город пользователя или 1 по дефолту
 							})
 						}
-						className='flex-shrink-0 flex flex-col items-center gap-3 cursor-pointer'
 					>
-						<div className='w-16 h-16 bg-secondary border border-white/5 rounded-[1.8rem] flex items-center justify-center text-2xl transition-all active:scale-90 shadow-sm'>
-							{s.icon}
-						</div>
-						<span className='text-[10px] font-black text-hint uppercase tracking-tighter text-center'>
-							{s.name.split('-')[0]}
-						</span>
-					</div>
+						{s.icon} {s.name}
+					</Chip>
 				))}
 			</div>
-			<GeoPromoCard />
-			<div className='px-6 space-y-5'>
-				<div className='flex justify-between items-center mb-2 px-1'>
-					<h3 className='text-xl font-black text-main tracking-tight uppercase text-xs tracking-[0.15em] opacity-60'>
-						Рекомендуем
-					</h3>
-					<button
-						onClick={() => handleAction('/search')}
-						className='text-[11px] font-black text-red-700 uppercase tracking-widest flex items-center gap-1'
-					>
-						Все <ChevronRight size={14} />
-					</button>
-				</div>
 
-				{isLoading ? (
-					<div className='flex justify-center py-20'>
-						<div className='w-10 h-10 border-4 border-white/5 border-t-red-700 rounded-full animate-spin' />
+			<TopEmployers telegramId={telegramId} />
+
+			{/* Резюме за 60 секунд */}
+			<div
+				className='wk-balance wk-press'
+				style={{ marginTop: 24, padding: 18 }}
+				onClick={() =>
+					handleAction('/create', 'medium', { type: 'res' })
+				}
+			>
+				<div className='flex items-center justify-between gap-3 relative'>
+					<div>
+						<div style={{ fontSize: 17, fontWeight: 700 }}>
+							Резюме за 60 секунд
+						</div>
+						<div style={{ fontSize: 13.5, opacity: 0.8, marginTop: 4 }}>
+							Работодатели увидят его и напишут вам
+						</div>
 					</div>
-				) : (
-					<div className='space-y-4 pb-20'>
-						{recommendations.map((vacancy: any) => (
-							<div
-								key={vacancy.id}
-								onClick={() =>
-									handleAction(
-										`/detail/${vacancy.id}`,
-										'light',
-										{ type: 'job', data: vacancy },
-									)
-								}
-								className={`relative bg-secondary border border-white/5 p-5 rounded-[2.5rem] shadow-sm flex flex-col gap-4 active:scale-[0.98] transition-all cursor-pointer overflow-hidden`}
-							>
-								{vacancy.boosted && (
-									<div className='absolute top-0 right-0 bg-gradient-to-br from-amber-400 to-orange-500 text-white text-[9px] font-black px-4 py-1.5 rounded-bl-2xl uppercase tracking-tighter shadow-sm z-10'>
-										<Zap
-											size={10}
-											fill='currentColor'
-											className='inline mr-1'
-										/>{' '}
-										Premium
-									</div>
-								)}
+					<span
+						className='flex items-center justify-center shrink-0'
+						style={{
+							width: 42,
+							height: 42,
+							borderRadius: 14,
+							background: 'rgba(255,255,255,.18)',
+						}}
+					>
+						<ChevronRight size={20} strokeWidth={1.8} />
+					</span>
+				</div>
+			</div>
 
-								<div className='flex items-center gap-4'>
-									{/* Media Icon */}
-									<div className='w-14 h-14 bg-main rounded-[1.4rem] flex-shrink-0 flex items-center justify-center text-2xl overflow-hidden border border-white/5 shadow-inner'>
-										{vacancy.logo ? (
-											<img
-												src={vacancy.logo}
-												className='w-full h-full object-cover'
-												alt=''
-											/>
-										) : (
-											<span className='text-2xl'>💼</span>
-										)}
-									</div>
+			<div className='grid grid-cols-2' style={{ gap: 12, marginTop: 12 }}>
+				<Panel press onClick={() => handleAction('/games')} style={{ padding: 16 }}>
+					<span
+						className='flex items-center justify-center'
+						style={{ width: 40, height: 40, borderRadius: 12, background: 'var(--gig-soft)', color: 'var(--gig)' }}
+					>
+						<Gamepad2 size={20} strokeWidth={1.8} />
+					</span>
+					<div style={{ fontWeight: 700, marginTop: 12 }}>Игры</div>
+					<div className='wk-xs'>Отдохни от поиска</div>
+				</Panel>
+				<Panel press onClick={() => handleAction('/subscription')} style={{ padding: 16 }}>
+					<span
+						className='flex items-center justify-center'
+						style={{ width: 40, height: 40, borderRadius: 12, background: 'var(--brand-soft)', color: 'var(--brand)' }}
+					>
+						<Gem size={20} strokeWidth={1.8} />
+					</span>
+					<div style={{ fontWeight: 700, marginTop: 12 }}>PRO</div>
+					<div className='wk-xs'>Контакты без лимита</div>
+				</Panel>
+			</div>
 
-									{/* Content Info */}
-									<div className='flex-1 min-w-0'>
-										<h4 className='font-black text-main text-[16px] leading-tight truncate pr-12'>
-											{vacancy.title}
-										</h4>
-										<p className='text-[10px] font-bold text-hint uppercase mt-1 truncate'>
-											{vacancy.companyName ||
-												vacancy.company ||
-												'Частное лицо'}{' '}
-											•{' '}
-											{vacancy.cityName ||
-												vacancy.location}
-										</p>
-									</div>
-								</div>
+			<GeoPromoCard />
 
-								<div className='flex items-center justify-between pt-4 border-t border-white/5'>
-									<div className='flex items-center gap-3'>
-										<div className='bg-main px-3 py-1 rounded-full border border-white/5'>
-											<span className='text-[9px] font-black text-hint uppercase tracking-tighter'>
-												{vacancy.tags?.[0] ||
-													'Вакансия'}
-											</span>
-										</div>
-										<span className='text-[10px] font-bold text-red-600 font-black'>
-											{vacancy.salary}
-										</span>
-									</div>
-									<span className='text-[9px] font-bold text-hint opacity-40 uppercase'>
-										{formatDate(vacancy.createdAt)}
-									</span>
-								</div>
+			<SectionHead
+				title='Новые вакансии'
+				right='Все'
+				onRight={() => handleAction('/search')}
+			/>
+
+			{isLoading ? (
+				<div className='wk-stack'>
+					{[0, 1, 2].map((i) => (
+						<Skeleton key={i} height={128} />
+					))}
+				</div>
+			) : recommendations.length === 0 ? (
+				<p className='wk-meta'>Пока нет вакансий в этой категории</p>
+			) : (
+				<div className='wk-stack'>
+					{recommendations.map((vacancy: any) => (
+						<JobCard
+							key={vacancy.id}
+							{...listingCardProps(vacancy, 'job')}
+							onClick={() =>
+								handleAction(`/detail/${vacancy.id}`, 'light', {
+									type: 'job',
+									data: vacancy,
+								})
+							}
+						/>
+					))}
+				</div>
+			)}
+			</>
+			)}
+		</div>
+	)
+}
+
+/** «Топ работодатели» [01]: горизонтальная лента CompanyCardWide */
+const TopEmployers: React.FC<{ telegramId: number }> = ({ telegramId }) => {
+	const navigate = useNavigate()
+	const { data = [], isLoading } = useGetCompaniesQuery({ tid: telegramId || undefined })
+	const top = data.slice(0, 10)
+	if (!isLoading && top.length === 0) return null
+	return (
+		<>
+			<SectionHead title='Топ работодатели' right='Все' onRight={() => navigate('/companies')} />
+			<div className='wk-corow'>
+				{isLoading
+					? [0, 1].map((i) => (
+							<div key={i} style={{ flex: '0 0 280px' }}>
+								<Skeleton height={230} radius={26} />
 							</div>
+						))
+					: top.map((c) => (
+							<CompanyCardWide
+								key={c.id}
+								c={c}
+								onClick={() => {
+									tg?.HapticFeedback?.impactOccurred('light')
+									navigate(`/company/${c.id}`)
+								}}
+							/>
+						))}
+			</div>
+		</>
+	)
+}
+
+/** Вкладка «Подработка» на главной [02] */
+const GigsTab: React.FC<{ telegramId: number }> = ({ telegramId }) => {
+	const navigate = useNavigate()
+	const { location: loc } = useContext(LocationContext)
+	const { data: gigs = [], isLoading, isError, refetch } = useGetGigsQuery(
+		{ tid: telegramId, lat: loc?.lat, lon: loc?.lng },
+		{ skip: !telegramId },
+	)
+	const { data: offers = [] } = useGetOffersQuery({ tid: telegramId }, { skip: !telegramId })
+	const others = offers.filter((o) => !o.mine).slice(0, 5)
+	const { data: customers = [] } = useGetTopGigCustomersQuery(telegramId || undefined)
+	const [customer, setCustomer] = useState<(typeof customers)[number] | null>(null)
+
+	return (
+		<>
+			<SectionHead title='Сегодня и завтра' right={loc ? 'рядом с вами' : undefined} />
+			{isLoading ? (
+				<Skeleton height={280} radius={24} />
+			) : isError ? (
+				<Panel className='text-center'>
+					<div className='wk-sub'>Не удалось загрузить. Проверьте интернет</div>
+					<Button size='sm' variant='ink' style={{ marginTop: 12 }} onClick={() => refetch()}>
+						Повторить
+					</Button>
+				</Panel>
+			) : gigs.length === 0 ? (
+				<EmptyState
+					emoji='⚡'
+					title='Пока нет заданий'
+					text='Здесь появятся задания на сегодня и завтра'
+				/>
+			) : (
+				<div className='wk-panel wk-gigs' style={{ padding: '0 18px' }}>
+					{gigs.map((g) => (
+						<GigRow
+							key={g.id}
+							time={gigTime(g.timeText)}
+							day={gigDayLabel(g.workDate)}
+							title={g.title}
+							urgent={g.urgent}
+							sub={[g.voiceUrl ? '🎧' : null, g.authorName, distanceText(g.distanceKm), g.payUnit === 'HOUR' ? 'оплата в час' : g.payUnit === 'SHIFT' ? 'за смену' : null].filter(Boolean).join(' · ')}
+							pay={payText(g.pay)}
+							onClick={() => navigate(`/gig/${g.id}`)}
+						/>
+					))}
+				</div>
+			)}
+			<Button
+				variant='line'
+				block
+				style={{ marginTop: 14 }}
+				onClick={() => {
+					wkHaptic.impact('medium')
+					navigate('/gig/new')
+				}}
+			>
+				<Plus size={18} strokeWidth={2} /> Нужен человек на пару часов?
+			</Button>
+
+			{customers.length > 0 && (
+				<>
+					<SectionHead title='Надёжные заказчики' right='за 3 месяца' />
+					<div className='wk-corow'>
+						{customers.map((c) => (
+							<GigCustomerCard
+								key={c.userId}
+								c={c}
+								onClick={() => {
+									wkHaptic.impact('light')
+									if (c.companyId) navigate(`/company/${c.companyId}`)
+									else setCustomer(c)
+								}}
+							/>
+						))}
+					</div>
+				</>
+			)}
+			<Sheet
+				open={!!customer}
+				onClose={() => setCustomer(null)}
+				title={customer?.name}
+				subtitle={customer ? `${customer.type} · ${customer.gigsCount} ${plural(customer.gigsCount, ['подработка', 'подработки', 'подработок'])} за 3 месяца` : undefined}
+			>
+				{customer && customer.openGigs.length === 0 ? (
+					<p className='wk-meta'>Сейчас открытых заданий нет — загляните позже.</p>
+				) : (
+					<div className='wk-panel wk-gigs' style={{ padding: '0 18px' }}>
+						{customer?.openGigs.map((g) => (
+							<GigRow
+								key={g.id}
+								time={gigTime(g.timeText)}
+								day={gigDayLabel(g.workDate)}
+								title={g.title}
+								urgent={g.urgent}
+								sub={[g.address, g.payUnit === 'HOUR' ? 'оплата в час' : g.payUnit === 'SHIFT' ? 'за смену' : null].filter(Boolean).join(' · ')}
+								pay={payText(g.pay)}
+								onClick={() => navigate(`/gig/${g.id}`)}
+							/>
 						))}
 					</div>
 				)}
-			</div>
-		</div>
+			</Sheet>
+
+			{others.length > 0 && (
+				<>
+					<SectionHead title='Готовы подработать' />
+					<div className='wk-stack'>
+						{others.map((o) => (
+							<JobCard
+								key={o.id}
+								avatar
+								logoName={o.name}
+								title={o.name}
+								company={<span className='truncate'>{o.skills.join(', ')}</span>}
+								salary={payText(o.price, o.priceUnit)}
+								meta={[o.district, o.days.join(', ')]}
+								onClick={() => navigate(`/offer/${o.id}`)}
+							/>
+						))}
+					</div>
+				</>
+			)}
+		</>
 	)
 }
 
@@ -823,104 +1093,95 @@ const SearchPage: React.FC<{ telegramId: number }> = ({ telegramId }) => {
 	])
 
 	return (
-		<div className='bg-main min-h-screen pb-40 animate-in fade-in'>
-			<header
-				className='p-6 pt-12 space-y-6 sticky top-0 bg-main/95 backdrop-blur-md z-40 border-b border-white/5'
-				style={{
-					paddingTop: 'calc(1.5rem + env(safe-area-inset-top))',
-				}}
-			>
-				<div className='flex items-center gap-4'>
-					<button
-						onClick={() => navigate(-1)}
-						className='w-10 h-10 bg-secondary rounded-xl flex items-center justify-center active:scale-95 transition-transform text-main'
-					>
-						←
-					</button>
-					<div className='flex-1 relative'>
-						<div className='absolute inset-y-0 left-4 flex items-center pointer-events-none text-hint'>
-							<SearchIconSmall />
-						</div>
-						<input
-							value={query}
-							onChange={(e) => setQuery(e.target.value)}
-							placeholder='Ключевые слова...'
-							className='w-full bg-secondary border border-white/5 h-12 pl-12 pr-4 rounded-2xl text-sm font-medium focus:outline-none ring-2 ring-transparent focus:ring-red-500/20 transition-all text-main'
-						/>
-					</div>
-				</div>
+		<div className='wk-screen wk-enter text-left'>
+			<div className='flex items-center' style={{ gap: 10 }}>
+				<IconButton label='Назад' onClick={() => navigate(-1)}>
+					<ChevronRight
+						size={22}
+						strokeWidth={1.8}
+						style={{ transform: 'rotate(180deg)' }}
+					/>
+				</IconButton>
+				<label className='wk-search flex-1' style={{ height: 50 }}>
+					<Search size={20} strokeWidth={1.8} />
+					<input
+						autoFocus={!query && !sphereId}
+						value={query}
+						onChange={(e) => setQuery(e.target.value)}
+						placeholder='Должность или компания'
+						enterKeyHint='search'
+					/>
+				</label>
+			</div>
 
-				<div className='flex bg-secondary p-1 rounded-2xl'>
-					<button
-						onClick={() => setType('job')}
-						className={`flex-1 py-2.5 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all ${type === 'job' ? 'bg-main text-red-700 shadow-sm' : 'text-hint'}`}
-					>
-						Вакансии
-					</button>
-					<button
-						onClick={() => setType('worker')}
-						className={`flex-1 py-2.5 text-[10px] font-black uppercase tracking-widest rounded-xl transition-all ${type === 'worker' ? 'bg-main text-red-700 shadow-sm' : 'text-hint'}`}
-					>
-						Сотрудники
-					</button>
-				</div>
+			<Tabs
+				className='mt-[22px]'
+				value={type}
+				onChange={(v) => setType(v as 'job' | 'worker')}
+				items={[
+					{ value: 'job', label: 'Вакансии' },
+					{ value: 'worker', label: 'Сотрудники' },
+				]}
+			/>
 
-				<div className='space-y-4'>
-					<div className='grid grid-cols-2 gap-3'>
+			<div className='grid grid-cols-2' style={{ gap: 10, marginTop: 16 }}>
+				<ElegantSelect
+					placeholder='Город'
+					value={cityId}
+					options={cities}
+					onChange={setCityId}
+				/>
+				<ElegantSelect
+					placeholder='Сфера'
+					value={sphereId}
+					options={spheres}
+					onChange={(id) => {
+						setSphereId(id)
+						setCategoryId(null)
+						setSubcategoryId(null)
+					}}
+				/>
+				{/* Категории и подкатегории */}
+				{sphereId && (
+					<>
 						<ElegantSelect
-							placeholder='Город'
-							value={cityId}
-							options={cities}
-							onChange={setCityId}
-						/>
-						<ElegantSelect
-							placeholder='Сфера'
-							value={sphereId}
-							options={spheres}
+							placeholder='Категория'
+							value={categoryId}
+							options={categories}
 							onChange={(id) => {
-								setSphereId(id)
-								setCategoryId(null)
+								setCategoryId(id)
 								setSubcategoryId(null)
 							}}
 						/>
-					</div>
-					{/* ВОССТАНОВЛЕННЫЙ БЛОК: Категории и Подкатегории */}
-					{sphereId && (
-						<div className='grid grid-cols-2 gap-3 animate-in fade-in slide-in-from-top-2'>
-							<ElegantSelect
-								placeholder='Категория'
-								value={categoryId}
-								options={categories}
-								onChange={(id) => {
-									setCategoryId(id)
-									setSubcategoryId(null)
-								}}
-							/>
-							<ElegantSelect
-								disabled={
-									!categoryId || subcategories.length === 0
-								}
-								placeholder={
-									subcategories.length === 0
-										? 'Нет подкат.'
-										: 'Подкатегория'
-								}
-								value={subcategoryId}
-								options={subcategories}
-								onChange={setSubcategoryId}
-							/>
-						</div>
-					)}
-				</div>
-			</header>
+						<ElegantSelect
+							disabled={!categoryId || subcategories.length === 0}
+							placeholder={
+								subcategories.length === 0
+									? 'Нет подкат.'
+									: 'Подкатегория'
+							}
+							value={subcategoryId}
+							options={subcategories}
+							onChange={setSubcategoryId}
+						/>
+					</>
+				)}
+			</div>
 
-			<div className='px-6 py-4 space-y-4 text-left'>
-				{loading && results.length === 0 ? (
-					<div className='p-20 flex justify-center'>
-						<div className='w-8 h-8 border-2 border-red-700 border-t-transparent rounded-full animate-spin' />
-					</div>
-				) : results.length > 0 ? (
-					results.map((item) => (
+			<SectionHead
+				title={type === 'job' ? 'Вакансии' : 'Сотрудники'}
+				right={loading ? undefined : fmtNum(results.length)}
+			/>
+
+			{loading && results.length === 0 ? (
+				<div className='wk-stack'>
+					{[0, 1, 2].map((i) => (
+						<Skeleton key={i} height={128} />
+					))}
+				</div>
+			) : results.length > 0 ? (
+				<div className='wk-stack'>
+					{results.map((item) => (
 						<SearchResultItem
 							key={item.id}
 							item={item}
@@ -935,13 +1196,15 @@ const SearchPage: React.FC<{ telegramId: number }> = ({ telegramId }) => {
 								})
 							}
 						/>
-					))
-				) : (
-					<div className='p-20 text-center text-hint font-bold uppercase tracking-widest text-[10px]'>
-						Ничего не найдено
-					</div>
-				)}
-			</div>
+					))}
+				</div>
+			) : (
+				<EmptyState
+					emoji='🔍'
+					title='Ничего не найдено'
+					text='Попробуйте другой запрос или сферу'
+				/>
+			)}
 		</div>
 	)
 }
@@ -978,119 +1241,25 @@ const SearchResultItem = ({ item, type, onClick }: any) => {
 		return () => observer.disconnect()
 	}, [item.id, type, trackView])
 
-	const isBoosted = item.boosted === true
-	const isFree = item.free === true
+	const card = listingCardProps(item, type)
 
 	return (
-		<div
+		<JobCard
 			ref={impressionRef}
+			{...card}
 			onClick={() => onClick(stats)}
-			className={`relative p-6 rounded-[2.5rem] border active:scale-[0.98] transition-all cursor-pointer ${
-				isBoosted
-					? 'bg-amber-500/10 border-amber-400 shadow-md shadow-amber-500/20'
-					: isFree
-						? 'bg-emerald-500/10 border-emerald-400 shadow-sm'
-						: 'bg-secondary border-white/5 shadow-sm'
-			}`}
-		>
-			{isBoosted && (
-				<div className='absolute -top-3 right-6 bg-gradient-to-r from-amber-400 to-orange-500 text-white text-[10px] font-black px-3 py-1 rounded-full shadow-sm flex items-center gap-1 z-10'>
-					<span>🚀</span>
-					<span>ТОП</span>
-				</div>
-			)}
-			{isFree && !isBoosted && (
-				<div className='absolute -top-3 right-6 bg-emerald-500 text-white text-[10px] font-black px-3 py-1 rounded-full shadow-sm flex items-center gap-1 z-10'>
-					<span>🎁</span>
-					<span>БЕСПЛАТНО</span>
-				</div>
-			)}
-
-			<div className='flex gap-4 items-start mb-3'>
-				{type === 'worker' && (
-					<div className='w-16 h-16 rounded-2xl overflow-hidden bg-main shrink-0 border border-white/10 shadow-inner'>
-						{item.media?.[0]?.fileUrl ? (
-							<img
-								src={item.media[0].fileUrl}
-								className='w-full h-full object-cover'
-								alt={item.name}
-							/>
-						) : (
-							<div className='w-full h-full flex items-center justify-center text-2xl'>
-								👤
-							</div>
-						)}
-					</div>
-				)}
-
-				<div className='flex-1 min-w-0 text-left'>
-					<span className='text-[9px] font-black text-white uppercase bg-red-700 px-2 py-1 rounded-lg inline-block mb-1'>
-						{type === 'job' ? 'Вакансия' : 'Резюме'}
-					</span>
-					<div className='flex justify-between items-start gap-2'>
-						<h3 className='text-lg font-black text-main leading-tight truncate'>
-							{type === 'job' ? item.title : item.name}
-						</h3>
-						<div
-							className={`text-xs font-black text-right shrink-0 whitespace-nowrap ${isBoosted ? 'text-amber-500' : 'text-red-700'}`}
-						>
-							{type === 'job'
-								? `${item.salary} 💵`
-								: `${item.experience}г. опыта`}
-						</div>
-					</div>
-				</div>
-			</div>
-
-			<p className='text-sm text-hint line-clamp-2 font-medium mb-4 text-left'>
-				{item.description}
-			</p>
-
-			<div
-				className={`pt-4 border-t flex items-center justify-between ${isBoosted ? 'border-amber-400/20' : isFree ? 'border-emerald-400/20' : 'border-white/5'}`}
-			>
-				<div className='flex items-center gap-3'>
-					<div className='flex items-center gap-1 text-[10px] font-black text-hint'>
-						<ViewIcon />
-						<span>{stats?.viewsCount ?? 0}</span>
-					</div>
-					<div className='flex items-center gap-1 text-[10px] font-black text-hint'>
-						<ClickIcon />
-						<span>{stats?.contactClicksCount ?? 0}</span>
-					</div>
-
-					<div className='flex items-center gap-1 text-[10px] font-black text-red-600 text-left'>
-						{/* <svg
-							className='w-3 h-3'
-							fill='none'
-							stroke='currentColor'
-							viewBox='0 0 24 24'
-						>
-							<path
-								strokeLinecap='round'
-								strokeLinejoin='round'
-								strokeWidth='3'
-								d='M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z'
-							/>
-						</svg> */}
-						{/* <span>
-							{type === 'job'
-								? (stats?.responseCount ?? 0)
-								: (stats?.invitationCount ?? 0)}
-						</span> */}
-						{type === 'job' && item.distanceKm != null && (
-							<span className='ml-1 text-hint font-medium'>
-								• ~{Math.round(item.distanceKm)} км от вас
-							</span>
-						)}
-					</div>
-				</div>
-				<div className='text-[10px] font-bold text-hint flex items-center gap-1'>
-					<span>📍</span>
-					{item.cityName}
-				</div>
-			</div>
-		</div>
+			meta={[
+				...card.meta,
+				<span className='wk-job__stats' key='v'>
+					<Eye size={14} strokeWidth={1.8} />
+					{stats?.viewsCount ?? 0}
+				</span>,
+				<span className='wk-job__stats' key='c'>
+					<MousePointerClick size={14} strokeWidth={1.8} />
+					{stats?.contactClicksCount ?? 0}
+				</span>,
+			]}
+		/>
 	)
 }
 
@@ -1099,8 +1268,13 @@ const DetailPage: React.FC<{ telegramId: number }> = ({ telegramId }) => {
 	const location = useLocation()
 	const { showToast } = useToast()
 	const { location: userLocation } = useContext(LocationContext)
+	const params = useParams()
+	const [detailSearch] = useSearchParams()
 
-	const { type, data } = location.state || {}
+	// Обычно данные приходят из списка через state; из уведомления бота — только id в адресе
+	const routeState = location.state || {}
+	const type = routeState.type || detailSearch.get('type') || 'job'
+	const data = routeState.data || { id: Number(params.id) }
 
 	const { data: newData, isLoading } =
 		type === 'worker'
@@ -1161,7 +1335,7 @@ const DetailPage: React.FC<{ telegramId: number }> = ({ telegramId }) => {
 		} else {
 			// Логика для Telegram
 			// Очищаем юзернейм от @ и лишних пробелов
-			const username = item.telegramUsername.trim()
+			const username = (item.telegramUsername || '').trim().replace(/^@/, '')
 
 			if (!username) {
 				showToast('Username не указан', 'error')
@@ -1200,16 +1374,16 @@ const DetailPage: React.FC<{ telegramId: number }> = ({ telegramId }) => {
 	}, [item?.phone, item?.free])
 
 	const isJob = type === 'job' || type === 'vac'
+	const { data: company } = useGetCompanyByVacancyQuery(data.id, { skip: !isJob || !data.id })
+	const { data: myApps = [] } = useGetMyApplicationsQuery(telegramId, { skip: !isJob })
+	const { data: myVacancies = [] } = useGetUserVacanciesQuery(telegramId, { skip: !isJob })
+	const [applyOpen, setApplyOpen] = useState(false)
+	const myApp = myApps.find((a) => a.vacancyId === Number(data.id))
+	const isMine = myVacancies.some((v: any) => v.id === Number(data.id))
 	const vacancy = isJob ? (item as Vacancy) : null
 	const resume = !isJob ? (item as Resume) : null
 
-	// Лоадер теперь тоже в теме
-	if (isLoading || !item)
-		return (
-			<div className='min-h-screen flex items-center justify-center bg-main'>
-				<div className='w-10 h-10 border-[3px] border-red-700 border-t-transparent rounded-full animate-spin' />
-			</div>
-		)
+	if (isLoading || !item) return <Loader />
 
 	return (
 		<>
@@ -1217,195 +1391,66 @@ const DetailPage: React.FC<{ telegramId: number }> = ({ telegramId }) => {
 				media={selectedMedia}
 				onClose={() => setSelectedMedia(null)}
 			/>
-			<div className='pb-32 animate-in fade-in duration-500 bg-main min-h-screen text-main'>
-				<header
-					className='px-6 py-4 flex items-center justify-between sticky top-0 bg-main/95 backdrop-blur-md z-50 border-b border-white/5'
-					style={{
-						paddingTop: 'calc(1.5rem + env(safe-area-inset-top))',
-					}}
-				>
-					<button
-						onClick={() => navigate(-1)}
-						className='w-10 h-10 flex items-center justify-center rounded-full bg-secondary text-main active:scale-90 transition-all'
-					>
-						<svg
-							className='w-5 h-5'
-							fill='none'
-							stroke='currentColor'
-							viewBox='0 0 24 24'
-						>
-							<path
-								strokeLinecap='round'
-								strokeLinejoin='round'
-								strokeWidth='2.5'
-								d='M15 19l-7-7 7-7'
-							/>
-						</svg>
-					</button>
-				</header>
-
-				<div className='px-6 pt-6 space-y-8 text-left'>
-					{/* Заголовок и Цена */}
-					<section className='space-y-4'>
-						<div className='space-y-2'>
-							<span className='text-[10px] font-black text-hint uppercase tracking-widest'>
-								{item.cityName} / {item.categoryName} /
-								{item.subcategoryName}
-							</span>
-							<h1 className='text-3xl font-black text-main leading-tight'>
-								{type === 'worker' ? item.name : item.title}
-							</h1>
-						</div>
-						<div className='inline-flex items-center px-6 py-3 bg-secondary text-main text-xl font-black rounded-2xl border border-white/5 shadow-sm'>
-							{isJob
-								? vacancy?.salary || 'ЗП не указана'
-								: `${resume?.experience}г. опыта`}
-						</div>
-					</section>
-
-					{/* КЛЮЧЕВЫЕ ДЕТАЛИ (Добавлено) */}
-					<section className='bg-secondary p-6 rounded-[2.5rem] border border-white/5 space-y-6'>
-						<h4 className='text-[10px] font-black text-hint uppercase tracking-widest'>
-							Ключевые детали
-						</h4>
-						<div className='grid grid-cols-1 gap-6'>
-							{isJob && (
-								<DetailRow
-									icon={<ClockIconSmall />}
-									label='График работы'
-									value={vacancy?.schedule || 'Не указано'}
-								/>
-							)}
-							<DetailRow
-								icon={<ExpIconSmall />}
-								label='Опыт'
-								value={`${isJob ? vacancy?.experienceInYear : resume?.experience} лет`}
-							/>
-
-							{isJob && vacancy?.address && (
-								<div
-									onClick={open2GISRoute}
-									className='cursor-pointer active:opacity-70 transition-opacity'
-								>
-									<DetailRow
-										icon={<LocIconSmall />}
-										label='Адрес / Район (Карта)'
-										value={vacancy.address}
-									/>
-									<div className='pl-[56px] text-[9px] font-bold text-emerald-600 uppercase mt-1 flex items-center gap-1'>
-										{/* RouteIcon должен быть определен в компоненте или импортирован */}
-										<svg
-											className='w-3 h-3'
-											fill='none'
-											viewBox='0 0 24 24'
-											stroke='currentColor'
-										>
-											<path
-												strokeLinecap='round'
-												strokeLinejoin='round'
-												strokeWidth='2.5'
-												d='M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7'
-											/>
-										</svg>
-										<span>Открыть маршрут в 2GIS</span>
-									</div>
-								</div>
-							)}
-							<DetailRow
-								icon={<UserIconSmall />}
-								label='Условия'
-								value={
-									isJob
-										? `Возраст: ${vacancy?.minAge || 18}-${vacancy?.maxAge || 60} • Пол: ${vacancy?.preferredGender === 'MALE' ? 'Мужчина' : vacancy?.preferredGender === 'FEMALE' ? 'Женщина' : 'Любой'}`
-										: `Возраст: ${resume?.age} • Пол: ${resume?.gender === 'MALE' ? 'Мужчина' : 'Женщина'}`
-								}
-							/>
-						</div>
-					</section>
-
-					{item.media && item.media.length > 0 && (
-						<section className='space-y-4'>
-							<h4 className='text-[10px] font-black text-hint uppercase tracking-widest px-1'>
-								Галерея
-							</h4>
-							<div className='flex gap-3 overflow-x-auto no-scrollbar pb-2 px-1'>
-								{item.media.map((file: any, index: number) => (
-									<div
-										key={index}
-										onClick={() => setSelectedMedia(file)}
-										className='w-32 h-32 rounded-2xl overflow-hidden bg-secondary shrink-0 border border-white/5 active:scale-95 transition-transform cursor-pointer'
-									>
-										<img
-											src={file.fileUrl}
-											className='w-full h-full object-cover'
-											alt={`Media ${index}`}
-										/>
-									</div>
-								))}
-							</div>
-						</section>
-					)}
-					{/* ПОДРОБНОЕ ОПИСАНИЕ (Добавлено) */}
-					<section className='space-y-4'>
-						<h4 className='text-[10px] font-black text-hint uppercase tracking-widest px-1'>
-							Подробное описание
-						</h4>
-						<div className='text-main/80 leading-relaxed whitespace-pre-wrap font-medium text-sm px-1'>
-							{item.description}
-						</div>
-					</section>
-
-					{/* СТАТИСТИКА И ДАТА (Добавлено) */}
-					<section className='flex items-center justify-between px-2 pt-4 border-t border-white/5 text-[10px] font-black text-hint uppercase tracking-widest'>
-						<div className='flex items-center gap-4'>
-							<span className='flex items-center gap-1.5'>
-								<ViewIcon /> {stats?.viewsCount || 0}
-							</span>
-							<span className='flex items-center gap-1.5'>
-								<ClickIcon /> {stats?.contactClicksCount || 0}
-							</span>
-						</div>
-						<span>
-							{item.createdAt
-								? new Date(item.createdAt).toLocaleDateString()
-								: 'Сегодня'}
-						</span>
-					</section>
-				</div>
-
-				{/* Футер с кнопками */}
-				<div className='fixed bottom-0 left-0 right-0 p-6 bg-main/90 backdrop-blur-2xl border-t border-white/5 z-50 shadow-[0_-10px_40px_rgba(0,0,0,0.05)]'>
-					<div className='max-w-xl mx-auto'>
-						{isLocked ? (
-							<button
-								onClick={() => navigate('/subscription')}
-								className='w-full h-16 bg-red-700 text-white rounded-2xl font-black uppercase tracking-widest shadow-xl'
+			{isJob && (
+				<ApplySheet
+					open={applyOpen}
+					onClose={() => setApplyOpen(false)}
+					telegramId={telegramId}
+					vacancyId={Number(item.id)}
+					vacancyTitle={item.title}
+				/>
+			)}
+			<ListingView
+				item={item}
+				isJob={isJob}
+				stats={stats}
+				isLocked={isLocked}
+				onBack={() => navigate(-1)}
+				onWhatsApp={() => handleContactClick('whatsapp')}
+				onTelegram={() => handleContactClick('telegram')}
+				onUnlock={() => navigate('/subscription')}
+				onRoute={open2GISRoute}
+				onMedia={setSelectedMedia}
+				company={isJob ? company : null}
+				onCompany={() => company && navigate(`/company/${company.id}`)}
+				coverRight={
+					isJob ? (
+						<>
+							<SaveHeart vacancyId={Number(item.id)} glass />
+							<IconButton
+								glass
+								label='Поделиться'
+								onClick={async () => {
+									const r = await shareListing(`vac_${item.id}`, `💼 ${item.title} — вакансия в Work KG`)
+									if (r === 'copied') showToast('Ссылка скопирована')
+								}}
 							>
-								💎 Купить PRO Доступ
-							</button>
-						) : (
-							<div className='grid grid-cols-2 gap-3 animate-in fade-in zoom-in-95 duration-300'>
-								<button
-									onClick={() =>
-										handleContactClick('whatsapp')
-									}
-									className='h-16 bg-[#075e54] text-white rounded-2xl font-black uppercase tracking-widest shadow-xl active:scale-95 transition-all'
-								>
-									WhatsApp
-								</button>
-								<button
-									onClick={() =>
-										handleContactClick('telegram')
-									}
-									className='h-16 bg-red-700 text-white rounded-2xl font-black uppercase tracking-widest shadow-xl active:scale-95 transition-all'
-								>
-									Telegram
-								</button>
-							</div>
-						)}
-					</div>
-				</div>
-			</div>
+								<Share size={20} strokeWidth={1.8} />
+							</IconButton>
+						</>
+					) : undefined
+				}
+				primary={
+					!isJob ? undefined : isMine ? (
+						<Button variant='ink' block onClick={() => navigate(`/applicants/${item.id}`)}>
+							Смотреть отклики
+						</Button>
+					) : myApp ? (
+						<Button variant='line' block onClick={() => navigate('/my-applications')}>
+							✓ Отклик отправлен · {STATUS_APPLICANT[myApp.status].label}
+						</Button>
+					) : (
+						<Button variant={isLocked ? 'red' : 'ink'} block onClick={() => setApplyOpen(true)}>
+							Откликнуться резюме
+						</Button>
+					)
+				}
+				note={
+					isLocked
+						? 'Бесплатно: 3 контакта в день · дальше с PRO'
+						: undefined
+				}
+			/>
 		</>
 	)
 }
@@ -1417,8 +1462,9 @@ const ProfilePage: React.FC<{ telegramId: number }> = ({ telegramId }) => {
 	const tgUserPhoto = window.Telegram?.WebApp?.initDataUnsafe?.user?.photo_url
 
 	// Текущий таб
-	const activeTab =
-		searchParams.get('tab') === 'vacancies' ? 'vacancies' : 'resumes'
+	const tabParam = searchParams.get('tab')
+	const activeTab: 'resumes' | 'vacancies' | 'gigs' =
+		tabParam === 'vacancies' || tabParam === 'gigs' ? tabParam : 'resumes'
 
 	// --- RTK QUERY ДАННЫЕ ---
 	const { data: user } = useGetUserQuery(telegramId)
@@ -1426,6 +1472,14 @@ const ProfilePage: React.FC<{ telegramId: number }> = ({ telegramId }) => {
 		useGetUserResumesQuery(telegramId)
 	const { data: vacancies = [], isLoading: vacLoading } =
 		useGetUserVacanciesQuery(telegramId)
+	const { data: myGigs = [], isLoading: gigsLoading } =
+		useGetMyGigsQuery(telegramId)
+	const { data: myOffer } = useGetMyOfferQuery(telegramId)
+	const { data: myCompany } = useGetMyCompanyQuery(telegramId)
+	const { data: followed = [] } = useGetFollowedCompaniesQuery(telegramId)
+	const { data: myApplications = [] } = useGetMyApplicationsQuery(telegramId)
+	const { data: savedIds = [] } = useGetSavedIdsQuery(telegramId)
+	const { data: appCounts = {} } = useGetApplicationCountsQuery(telegramId)
 
 	// --- МУТАЦИИ ---
 	const [boostVacancy, { isLoading: isBoostingVac }] =
@@ -1506,55 +1560,78 @@ const ProfilePage: React.FC<{ telegramId: number }> = ({ telegramId }) => {
 	}
 
 	const renderCard = (item: any, type: 'res' | 'vac') => (
-		<div
-			key={item.id}
-			className={`bg-main p-6 rounded-[2.5rem] border shadow-sm transition-all relative overflow-hidden ${
-				item.isActive ? 'border-white/5' : 'border-white/10 opacity-60'
-			}`}
-		>
-			<div
-				className={`absolute top-0 left-0 px-4 py-1 text-[8px] font-black uppercase rounded-br-2xl ${item.isActive ? 'bg-emerald-500 text-white' : 'bg-hint text-white'}`}
-			>
-				{item.isActive ? 'Активно' : 'Скрыто'}
-			</div>
-
-			<div className='flex justify-between items-start mb-5 pt-2 text-left'>
-				<div>
-					<h4
-						className={`font-black text-lg leading-tight text-main ${!item.isActive && 'text-hint'}`}
+		<Panel key={item.id} style={{ opacity: item.isActive ? 1 : 0.75 }}>
+			<div className='flex items-start gap-3'>
+				<div className='flex-1 min-w-0'>
+					<div
+						className='wk-clamp2'
+						style={{ fontSize: 17, fontWeight: 600, letterSpacing: '-.015em' }}
 					>
 						{type === 'res' ? item.name : item.title}
-					</h4>
-					<p className='text-[10px] font-bold text-hint uppercase mt-1'>
-						{item.cityName} • {item.categoryName}
-					</p>
+					</div>
+					<div className='wk-xs' style={{ marginTop: 3 }}>
+						{[item.cityName, item.categoryName].filter(Boolean).join(' · ')}
+					</div>
 				</div>
-				<div className='flex gap-2'>
-					<button
-						onClick={() => handleToggleStatus(item, type)}
-						className={`w-10 h-10 flex items-center justify-center rounded-xl transition-all active:scale-90 bg-secondary text-main`}
-					>
-						{item.isActive ? '👁️‍🗨️' : '👁️'}
-					</button>
-					<button
-						onClick={() =>
-							navigate('/edit', { state: { type, id: item.id } })
-						}
-						className='w-10 h-10 flex items-center justify-center bg-secondary rounded-xl active:scale-90'
-					>
-						✏️
-					</button>
-					<button
-						onClick={() => handleDelete(item.id, type)}
-						className='w-10 h-10 flex items-center justify-center bg-red-700/10 text-red-700 rounded-xl active:scale-90'
-					>
-						🗑️
-					</button>
-				</div>
+				{item.isActive ? (
+					<StatusPill tone='ok'>Активно</StatusPill>
+				) : (
+					<StatusPill tone='muted'>Скрыто</StatusPill>
+				)}
 			</div>
 
-			<div className='grid grid-cols-2 gap-3 mt-4'>
+			{type === 'vac' && (
 				<button
+					type='button'
+					className='wk-applink wk-press'
+					onClick={() => navigate(`/applicants/${item.id}`)}
+				>
+					<span>
+						Отклики · <b>{appCounts[item.id]?.total || 0}</b>
+					</span>
+					{appCounts[item.id]?.fresh ? (
+						<StatusPill tone='brand'>+{appCounts[item.id].fresh} новых</StatusPill>
+					) : (
+						<ChevronRight size={18} strokeWidth={1.8} />
+					)}
+				</button>
+			)}
+
+			<div className='flex items-center' style={{ gap: 8, marginTop: 14 }}>
+				<IconButton
+					className='wk-iconbtn--plain'
+					label={item.isActive ? 'Скрыть' : 'Показать'}
+					onClick={() => handleToggleStatus(item, type)}
+				>
+					{item.isActive ? (
+						<EyeOff size={18} strokeWidth={1.8} />
+					) : (
+						<Eye size={18} strokeWidth={1.8} />
+					)}
+				</IconButton>
+				<IconButton
+					className='wk-iconbtn--plain'
+					label='Редактировать'
+					onClick={() =>
+						navigate('/edit', { state: { type, id: item.id } })
+					}
+				>
+					<Pencil size={18} strokeWidth={1.8} />
+				</IconButton>
+				<IconButton
+					className='wk-iconbtn--plain'
+					label='Удалить'
+					style={{ color: 'var(--brand)' }}
+					onClick={() => handleDelete(item.id, type)}
+				>
+					<Trash2 size={18} strokeWidth={1.8} />
+				</IconButton>
+			</div>
+
+			<div className='grid grid-cols-2' style={{ gap: 10, marginTop: 14 }}>
+				<Button
+					variant='line'
+					size='sm'
 					onClick={() =>
 						navigate('/profile-detail', {
 							state: {
@@ -1563,11 +1640,12 @@ const ProfilePage: React.FC<{ telegramId: number }> = ({ telegramId }) => {
 							},
 						})
 					}
-					className='py-4 bg-secondary text-main rounded-2xl text-[10px] font-black uppercase tracking-widest active:scale-[0.98]'
 				>
 					Просмотр
-				</button>
-				<button
+				</Button>
+				<Button
+					variant='ink'
+					size='sm'
 					disabled={!item.isActive}
 					onClick={() =>
 						setBoostTarget({
@@ -1576,141 +1654,226 @@ const ProfilePage: React.FC<{ telegramId: number }> = ({ telegramId }) => {
 							name: type === 'res' ? item.name : item.title,
 						})
 					}
-					className={`py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all ${item.isActive ? 'bg-red-700/10 text-red-700 active:scale-[0.98]' : 'bg-secondary text-hint cursor-not-allowed'}`}
 				>
-					Продвинуть 🚀
-				</button>
+					<Rocket size={16} strokeWidth={1.8} /> Продвинуть
+				</Button>
 			</div>
-		</div>
+		</Panel>
 	)
 
+	const list = activeTab === 'resumes' ? resumes : vacancies
+	const listLoading =
+		activeTab === 'resumes' ? resLoading : activeTab === 'vacancies' ? vacLoading : gigsLoading
+
 	return (
-		<div className='px-5 space-y-6 py-12 pb-40 min-h-screen bg-secondary'>
+		<div className='wk-screen wk-enter text-left'>
 			{/* Информация о пользователе */}
-			<div className='bg-main p-8 rounded-[2.5rem] border border-white/5 shadow-sm space-y-4'>
-				<div className='flex items-center gap-4'>
-					<div className='w-16 h-16 bg-secondary rounded-3xl flex items-center justify-center font-black text-main text-2xl overflow-hidden'>
-						{tgUserPhoto ? (
-							<img
-								src={tgUserPhoto}
-								alt='Profile'
-								className='w-full h-full object-cover'
-							/>
-						) : (
-							user?.firstName?.charAt(0)
-						)}
-					</div>
-					<div className='text-left'>
-						<h3 className='text-xl font-black text-main'>
-							{user?.firstName}
-						</h3>
-						<p className='text-xs font-bold text-hint uppercase'>
-							ID: {telegramId}
-						</p>
-					</div>
-					<button
-						onClick={() => navigate('/subscription')}
-						className='ml-auto px-4 py-2 bg-red-700 text-white text-[9px] font-black uppercase rounded-xl shadow-lg shadow-red-700/20'
+			<div className='flex items-center' style={{ gap: 16 }}>
+				<Avatar name={user?.firstName} src={tgUserPhoto} size={72} />
+				<div className='min-w-0'>
+					<h1
+						className='wk-h1 truncate'
+						style={{ fontSize: 26 }}
 					>
-						PRO 💎
-					</button>
-				</div>
-				<div className='pt-4 border-t border-white/5 flex justify-between items-center'>
-					<div className='text-left'>
-						<span className='text-[10px] font-black text-hint uppercase block'>
-							Баланс
-						</span>
-						<span className='text-lg font-black text-red-700'>
-							{user?.balance || 0} PTS
-						</span>
+						{user?.firstName || 'Профиль'}
+					</h1>
+					<div className='wk-meta' style={{ marginTop: 4 }}>
+						ID {telegramId}
 					</div>
-					<button
-						onClick={() => navigate('/withdraw')}
-						className='text-[10px] font-black text-main uppercase bg-secondary px-4 py-2 rounded-xl border border-white/5'
-					>
-						Вывод
-					</button>
 				</div>
 			</div>
 
-			{/* Табы (Исправлено: Темно-серый/Черный как в оригинале) */}
-			<div className='flex bg-main p-1.5 rounded-2xl border border-white/5 shadow-sm'>
-				<button
-					onClick={() => setSearchParams({ tab: 'resumes' })}
-					className={`flex-1 py-3 rounded-xl font-black text-xs uppercase tracking-widest transition-all ${activeTab === 'resumes' ? 'bg-[#111111] text-white shadow-xl' : 'text-hint'}`}
-				>
-					Мои Резюме
-				</button>
-				<button
-					onClick={() => setSearchParams({ tab: 'vacancies' })}
-					className={`flex-1 py-3 rounded-xl font-black text-xs uppercase tracking-widest transition-all ${activeTab === 'vacancies' ? 'bg-[#111111] text-white shadow-xl' : 'text-hint'}`}
-				>
-					Мои Вакансии
-				</button>
+			<div style={{ marginTop: 22 }}>
+				<StatsBlock
+					items={[
+						{ value: fmtNum(resumes.length), label: 'резюме' },
+						{ value: fmtNum(vacancies.length), label: 'вакансий' },
+						{
+							value: fmtNum(user?.balance || 0),
+							label: 'баллов',
+							onClick: () => navigate('/bonuses'),
+						},
+					]}
+				/>
 			</div>
+
+			<div style={{ marginTop: 14 }}>
+				<MenuList
+					items={[
+						{
+							icon: <Wrench size={20} strokeWidth={1.8} />,
+							label: 'Мои услуги',
+							value: !myOffer ? 'Добавить' : myOffer.isActive ? 'Активно' : 'Скрыто',
+							valueOk: !!myOffer?.isActive,
+							onClick: () => navigate('/offer/edit'),
+						},
+						{
+							icon: <Building2 size={20} strokeWidth={1.8} />,
+							label: 'Моя компания',
+							value: myCompany ? myCompany.name : 'Создать',
+							onClick: () =>
+								navigate(myCompany ? `/company/${myCompany.id}` : '/company/edit'),
+						},
+						{
+							icon: <Send size={20} strokeWidth={1.8} />,
+							label: 'Мои отклики',
+							value: myApplications.length ? String(myApplications.length) : 'Нет',
+							onClick: () => navigate('/my-applications'),
+						},
+						{
+							icon: <Heart size={20} strokeWidth={1.8} />,
+							label: 'Сохранённые',
+							value: savedIds.length ? String(savedIds.length) : 'Нет',
+							onClick: () => navigate('/saved'),
+						},
+						{
+							icon: <Bell size={20} strokeWidth={1.8} />,
+							label: 'Подписки на компании',
+							value: followed.length ? String(followed.length) : 'Нет',
+							onClick: () => navigate('/following'),
+						},
+						{
+							icon: <Gift size={20} strokeWidth={1.8} />,
+							label: 'Бонусы',
+							value: 'Пригласить друга',
+							onClick: () => navigate('/bonuses'),
+						},
+						{
+							icon: <Wallet size={20} strokeWidth={1.8} />,
+							label: 'Вывод',
+							value: `${fmtNum(user?.balance || 0)} баллов`,
+							onClick: () => navigate('/withdraw'),
+						},
+						{
+							icon: <BellRing size={20} strokeWidth={1.8} />,
+							label: 'Уведомления',
+							value: 'Настроить',
+							onClick: () => navigate('/notifications'),
+						},
+						{
+							icon: <Gem size={20} strokeWidth={1.8} />,
+							label: 'PRO',
+							value: 'Контакты без лимита',
+							onClick: () => navigate('/subscription'),
+						},
+					]}
+				/>
+			</div>
+
+			<Tabs
+				className='mt-[30px]'
+				value={activeTab}
+				onChange={(v) => setSearchParams({ tab: v })}
+				items={[
+					{
+						value: 'resumes',
+						label: `Резюме${resumes.length ? ` · ${resumes.length}` : ''}`,
+					},
+					{
+						value: 'vacancies',
+						label: `Вакансии${vacancies.length ? ` · ${vacancies.length}` : ''}`,
+					},
+					{
+						value: 'gigs',
+						label: `Задания${myGigs.length ? ` · ${myGigs.length}` : ''}`,
+					},
+				]}
+			/>
 
 			{/* Список объявлений */}
-			{(activeTab === 'resumes' ? resLoading : vacLoading) ? (
-				<div className='animate-pulse space-y-4'>
-					{[1, 2].map((i) => (
-						<div
-							key={i}
-							className='h-64 bg-main rounded-[2.5rem]'
-						/>
-					))}
-				</div>
-			) : (
-				<div className='space-y-4'>
-					{(activeTab === 'resumes' ? resumes : vacancies).length >
-					0 ? (
-						(activeTab === 'resumes' ? resumes : vacancies).map(
-							(i) =>
-								renderCard(
-									i,
-									activeTab === 'resumes' ? 'res' : 'vac',
-								),
-						)
+			<div className='wk-stack' style={{ marginTop: 16 }}>
+				{listLoading ? (
+					[0, 1].map((i) => <Skeleton key={i} height={170} />)
+				) : activeTab === 'gigs' ? (
+					myGigs.length > 0 ? (
+						<div className='wk-panel wk-gigs' style={{ padding: '0 18px' }}>
+							{myGigs.map((g) => (
+								<GigRow
+									key={g.id}
+									time={gigTime(g.timeText)}
+									day={gigDayLabel(g.workDate)}
+									title={g.title}
+									urgent={g.urgent}
+									sub={g.isActive ? 'В ленте' : 'Снято с публикации'}
+									pay={payText(g.pay)}
+									onClick={() => navigate(`/gig/${g.id}`)}
+								/>
+							))}
+						</div>
 					) : (
-						<div className='py-20 text-center text-hint font-bold uppercase text-[10px] tracking-widest'>
-							Здесь пока пусто
-						</div>
-					)}
-				</div>
-			)}
-
-			{/* Модалка продвижения */}
-			{boostTarget && (
-				<div className='fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-end justify-center'>
-					<div
-						className='absolute inset-0'
-						onClick={() => setBoostTarget(null)}
+						<EmptyState
+							emoji='⚡'
+							title='Заданий пока нет'
+							text='Нужен человек на пару часов? Исполнители рядом получат уведомление'
+							action={
+								<Button size='sm' variant='ink' onClick={() => navigate('/gig/new')}>
+									Создать задание
+								</Button>
+							}
+						/>
+					)
+				) : list.length > 0 ? (
+					list.map((i) =>
+						renderCard(i, activeTab === 'resumes' ? 'res' : 'vac'),
+					)
+				) : (
+					<EmptyState
+						emoji={activeTab === 'resumes' ? '📄' : '💼'}
+						title='Здесь пока пусто'
+						text={
+							activeTab === 'resumes'
+								? 'Резюме за 60 секунд — и работодатели напишут вам'
+								: 'Опубликуйте вакансию — соискатели напишут вам'
+						}
+						action={
+							<Button
+								size='sm'
+								variant='ink'
+								onClick={() =>
+									navigate('/create', {
+										state: {
+											type:
+												activeTab === 'resumes'
+													? 'res'
+													: 'vac',
+										},
+									})
+								}
+							>
+								{activeTab === 'resumes'
+									? 'Создать резюме'
+									: 'Создать вакансию'}
+							</Button>
+						}
 					/>
-					<div className='w-full max-w-md bg-main rounded-t-[3rem] p-8 pb-12 space-y-6 animate-in slide-in-from-bottom duration-300 relative z-[101] mb-[20px] shadow-2xl'>
-						<div className='text-center space-y-2'>
-							<div className='w-12 h-1.5 bg-secondary rounded-full mx-auto mb-4' />
-							<h3 className='text-2xl font-black text-main'>
-								Продвижение 🚀
-							</h3>
-							<p className='text-sm text-hint font-medium'>
-								Поднимите «
-								<span className='text-main font-bold'>
-									{boostTarget.name}
-								</span>
-								» в ТОП на 24 часа.
-							</p>
-						</div>
-						<button
-							disabled={isBoosting}
-							onClick={handleApplyBoost}
-							className='w-full py-5 bg-[#111111] text-white rounded-2xl font-black uppercase tracking-widest active:scale-95'
-						>
-							{isBoosting
-								? 'Применяем...'
-								: 'Поднять за 400 баллов'}
-						</button>
-					</div>
-				</div>
-			)}
+				)}
+			</div>
+
+			{/* Продвижение */}
+			<Sheet
+				open={!!boostTarget}
+				onClose={() => setBoostTarget(null)}
+				title='Продвижение'
+				subtitle={
+					<>
+						Поднимите «
+						<b style={{ color: 'var(--ink)' }}>{boostTarget?.name}</b>»
+						в ТОП на 24 часа.
+					</>
+				}
+			>
+				<Button
+					variant='red'
+					block
+					loading={isBoosting}
+					onClick={handleApplyBoost}
+				>
+					Поднять за 400 баллов
+				</Button>
+				<p className='wk-note'>
+					Баланс: {fmtNum(user?.balance || 0)} баллов
+				</p>
+			</Sheet>
 		</div>
 	)
 }
@@ -1849,85 +2012,125 @@ const WithdrawPage: React.FC<{ telegramId: number }> = ({ telegramId }) => {
 		}
 	}
 
+	const balance = user?.balance || 0
+	const overBalance = !!user && Number(amount) > balance
+
 	return (
-		<div className='bg-white min-h-screen pb-40 animate-in fade-in duration-500'>
-			<header className='p-6 pt-12 flex items-center gap-4 sticky top-0 bg-white/90 backdrop-blur-md z-40 border-b border-slate-100'>
-				<button
-					onClick={() => navigate(-1)}
-					className='w-10 h-10 bg-slate-50 rounded-xl flex items-center justify-center text-slate-600'
+		<div className='wk-screen wk-enter text-left'>
+			<ScreenHeader title='Вывод' onBack={() => navigate(-1)} />
+
+			<div className='text-center' style={{ marginTop: 10 }}>
+				<div className='wk-xs'>Вы получите</div>
+				<div
+					style={{ fontSize: 44, fontWeight: 800, letterSpacing: '-.04em', marginTop: 4 }}
 				>
-					←
-				</button>
-				<h2 className='text-2xl font-black text-slate-900'>
-					Вывод средств
-				</h2>
-			</header>
-			<div className='px-6 py-8 space-y-8 text-left'>
-				<div className='brand-gradient p-8 rounded-[2.5rem] text-white shadow-xl brand-shadow'>
-					<div className='text-[10px] font-black uppercase opacity-80 mb-1'>
-						Ваш баланс
-					</div>
-					<div className='text-4xl font-black'>
-						{user?.balance || 0} PTS
-					</div>
+					{fmtMoney(somAmount)} сом
 				</div>
-
-				<ElegantSelect
-					label='Выберите Банк'
-					placeholder='Выберите банк'
-					value={selectedBankKey}
-					options={Object.entries(BANK_SERVICES).map(([key, b]) => ({
-						id: key,
-						name: b.name,
-						icon: b.icon,
-					}))}
-					onChange={(key) => setSelectedBankKey(key)}
-				/>
-
-				<div className='space-y-6'>
-					<FormField label='Сумма баллов (PTS)'>
-						<div className='relative'>
-							<input
-								type='number'
-								value={amount}
-								onChange={(e) => setAmount(e.target.value)}
-								placeholder='100'
-								className='w-full bg-slate-50 border border-slate-100 h-20 px-8 rounded-[2rem] text-3xl font-black focus:outline-none pr-40'
-							/>
-							<div className='absolute right-4 top-1/2 -translate-y-1/2 px-4 py-2 bg-white rounded-2xl shadow-sm border flex flex-col items-end'>
-								<span className='text-[9px] font-black text-slate-400 uppercase mb-1'>
-									К получению
-								</span>
-								<span className='text-lg font-black text-red-800 leading-none'>
-									{somAmount} СОМ
-								</span>
-							</div>
-						</div>
-					</FormField>
-					<FormField label='Номер телефона для зачисления'>
-						<input
-							type='tel'
-							value={recipientPhone}
-							onChange={(e) =>
-								setRecipientPhone(formatPhoneKG(e.target.value))
-							}
-							placeholder='+996'
-							className='w-full bg-slate-50 border h-16 px-6 rounded-2xl text-lg font-bold focus:outline-none'
-						/>
-					</FormField>
-				</div>
-
-				<button
-					onClick={handleWithdraw}
-					disabled={isLoading}
-					className='w-full py-6 bg-slate-900 text-white rounded-[2rem] font-black uppercase text-xs tracking-widest shadow-xl active:scale-[0.98] transition-transform disabled:opacity-50'
-				>
-					{isLoading ? 'Загрузка...' : 'Подтвердить вывод'}
-				</button>
-				<p className='text-[10px] text-slate-400 font-medium text-center uppercase tracking-widest px-8'>
-					Курс: 100 PTS = 5 СОМ
-				</p>
+				<div className='wk-sub'>доступно {fmtNum(balance)} баллов</div>
 			</div>
+
+			<div style={{ marginTop: 26 }}>
+				<FormField
+					label='Баллов к выводу'
+					hint='Без комиссии · 100 баллов = 5 сом'
+					error={overBalance ? 'Недостаточно баллов' : undefined}
+				>
+					<div className='relative'>
+						<input
+							type='number'
+							inputMode='numeric'
+							value={amount}
+							onChange={(e) => setAmount(e.target.value)}
+							placeholder='1 000'
+							className={cx('wk-input', overBalance && 'is-error')}
+							style={{ paddingRight: 80 }}
+						/>
+						<button
+							type='button'
+							className='wk-chip absolute right-2 top-1/2 -translate-y-1/2'
+							style={{ height: 34 }}
+							onClick={() => setAmount(String(balance))}
+						>
+							Всё
+						</button>
+					</div>
+				</FormField>
+
+				<div className='wk-field'>
+					<label className='wk-label'>Куда</label>
+					<div className='grid grid-cols-2' style={{ gap: 10 }}>
+						{Object.entries(BANK_SERVICES).map(([key, b]) => {
+							const active = key === selectedBankKey
+							return (
+								<button
+									type='button'
+									key={key}
+									onClick={() => {
+										wkHaptic.select()
+										setSelectedBankKey(key)
+									}}
+									className='flex items-center text-left'
+									style={{
+										gap: 10,
+										background: 'var(--card)',
+										borderRadius: 16,
+										padding: 12,
+										boxShadow: 'var(--sh)',
+										border: `2px solid ${active ? 'var(--ink)' : 'transparent'}`,
+									}}
+								>
+									<span
+										className='relative flex items-center justify-center overflow-hidden shrink-0'
+										style={{ width: 34, height: 34, borderRadius: 10, background: 'var(--soft)', fontWeight: 800, fontSize: 14, color: 'var(--ink2)' }}
+									>
+										{b.name.charAt(0)}
+										<img
+											src={b.icon}
+											alt=''
+											className='absolute'
+											style={{ width: 22, height: 22, objectFit: 'contain', background: 'var(--soft)', boxShadow: '0 0 0 6px var(--soft)' }}
+											onError={(e) => (e.currentTarget.style.display = 'none')}
+										/>
+									</span>
+									<span
+										className='truncate'
+										style={{ fontSize: 14, fontWeight: 600 }}
+									>
+										{b.name}
+									</span>
+								</button>
+							)
+						})}
+					</div>
+				</div>
+
+				<FormField
+					label='Номер телефона'
+					hint='Деньги придут в течение 24 часов'
+				>
+					<input
+						type='tel'
+						inputMode='tel'
+						value={recipientPhone}
+						onChange={(e) =>
+							setRecipientPhone(formatPhoneKG(e.target.value))
+						}
+						placeholder='+996'
+						className='wk-input'
+					/>
+				</FormField>
+			</div>
+
+			<Button
+				variant='red'
+				block
+				style={{ marginTop: 28 }}
+				loading={isLoading}
+				disabled={overBalance}
+				onClick={handleWithdraw}
+			>
+				Вывести {fmtMoney(somAmount)} сом
+			</Button>
 		</div>
 	)
 }
@@ -1996,216 +2199,111 @@ export const SubscriptionPage: React.FC<{ telegramId: number }> = ({
 		}
 	}
 
-	if (pageLoading) {
-		return (
-			<div className='min-h-screen flex items-center justify-center bg-white'>
-				<div className='w-10 h-10 border-[3px] border-slate-900 border-t-transparent rounded-full animate-spin' />
-			</div>
-		)
-	}
+	if (pageLoading) return <Loader />
+
+	const active = !!status?.hasActiveSubscription
 
 	return (
-		<div className='px-5 space-y-8 pb-32 animate-in fade-in duration-500 bg-white min-h-screen text-left'>
-			{/* Header */}
-			<header className='flex items-center gap-4 py-8'>
-				<button
-					onClick={() => navigate(-1)}
-					className='w-12 h-12 bg-slate-50 rounded-2xl flex items-center justify-center text-slate-600 active:scale-90 transition-transform'
+		<div className='wk-screen wk-enter text-left'>
+			<ScreenHeader
+				title='PRO'
+				subtitle='Пишите работодателям и сотрудникам без лимита'
+				onBack={() => navigate(-1)}
+			/>
+
+			{/* Статус */}
+			<div
+				className='wk-balance'
+				style={{
+					background: active
+						? 'linear-gradient(140deg, #052E22, #0E9F6E)'
+						: 'linear-gradient(140deg, #0F0F14, #3F3F46)',
+				}}
+			>
+				<div style={{ fontSize: 12.5, opacity: 0.7 }}>Статус</div>
+				<div
+					style={{ fontSize: 28, fontWeight: 800, letterSpacing: '-.03em', marginTop: 4 }}
 				>
-					<svg
-						className='w-6 h-6'
-						fill='none'
-						stroke='currentColor'
-						viewBox='0 0 24 24'
-					>
-						<path
-							strokeLinecap='round'
-							strokeLinejoin='round'
-							strokeWidth='3'
-							d='M15 19l-7-7 7-7'
-						/>
-					</svg>
-				</button>
-				<div>
-					<h2 className='text-2xl font-black text-slate-900 leading-tight'>
-						WORK KG PRO
-					</h2>
-					<p className='text-[10px] font-black text-slate-400 uppercase tracking-widest'>
-						Уровни доступа
-					</p>
+					{active ? 'PRO активен' : 'Базовый доступ'}
 				</div>
-			</header>
-
-			{/* Main Status Banner */}
-			<div
-				className={`p-10 rounded-[3rem] text-white text-center shadow-2xl relative overflow-hidden transition-all duration-700 ${
-					status?.hasActiveSubscription
-						? 'bg-emerald-600'
-						: 'bg-[#111111]'
-				}`}
-			>
-				<div className='absolute top-0 right-0 w-64 h-64 bg-white/10 blur-[100px] rounded-full'></div>
-				<div className='absolute bottom-0 left-0 w-40 h-40 bg-black/20 blur-[80px] rounded-full'></div>
-
-				<h2 className='text-4xl font-black italic tracking-tighter mb-2 relative z-10'>
-					{status?.hasActiveSubscription
-						? 'PRO АКТИВИРОВАН'
-						: 'ПРЕМИУМ ДОСТУП'}
-				</h2>
-
-				{status?.hasActiveSubscription ? (
-					<div className='relative z-10 space-y-1'>
-						<p className='text-[11px] font-black uppercase tracking-widest opacity-90'>
-							Подписка истекает:{' '}
-							{status.endDate
-								? new Date(status.endDate).toLocaleDateString()
-								: '-'}
-						</p>
-						<div className='inline-block px-4 py-1 bg-white/20 rounded-full text-[10px] font-black uppercase mt-2'>
-							Осталось дней: {status.daysLeft}
-						</div>
-					</div>
-				) : (
-					<p className='text-xs font-black text-slate-400 uppercase tracking-[0.4em] relative z-10 opacity-80'>
-						Unlimited Opportunities
-					</p>
-				)}
+				<div style={{ fontSize: 14, opacity: 0.8, marginTop: 6 }}>
+					{active
+						? `До ${status?.endDate ? new Date(status.endDate).toLocaleDateString('ru-RU') : '—'} · осталось ${status?.daysLeft} ${plural(status?.daysLeft || 0, ['день', 'дня', 'дней'])}`
+						: 'Бесплатно: 3 контакта в день'}
+				</div>
 			</div>
 
-			{/* Free Tier Info */}
-			<div
-				className={`transition-all duration-500 border p-6 rounded-[2.5rem] flex items-center justify-between ${
-					status?.hasActiveSubscription
-						? 'opacity-40 grayscale pointer-events-none border-slate-100'
-						: 'bg-slate-50 border-slate-100'
-				}`}
-			>
-				<div className='text-left'>
-					<div className='flex items-center gap-2 mb-1'>
-						<span className='text-[9px] font-black bg-slate-200 text-slate-500 px-2 py-0.5 rounded-lg uppercase tracking-widest'>
-							Базовый
-						</span>
-						<span className='text-lg'>🌱</span>
-					</div>
-					<h3 className='text-xl font-black text-slate-900'>
-						Бесплатно
-					</h3>
-					<p className='text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1'>
-						{status?.hasActiveSubscription
-							? 'Тариф отключен (PRO)'
-							: 'Лимит: 3 контакта в день'}
-					</p>
-				</div>
-				{!status?.hasActiveSubscription && (
-					<div className='bg-white p-4 rounded-2xl shadow-sm border border-slate-100'>
-						<span className='text-sm font-black text-emerald-500'>
-							✓
-						</span>
-					</div>
-				)}
-			</div>
-
-			{/* 👇👇👇 ВОТ ЗДЕСЬ НАДПИСЬ ПРО АКЦИЮ 👇👇👇 */}
-			{!status?.hasActiveSubscription && (
-				<div className='bg-red-50 border-2 border-red-100 rounded-3xl p-4 text-center'>
-					<p className='text-sm font-black text-red-600 uppercase tracking-widest'>
-						🔥 Внимание: Эта тарификация действует только до 15 мая
-					</p>
+			{!active && (
+				<div
+					style={{
+						marginTop: 14,
+						background: 'var(--brand-soft)',
+						color: 'var(--brand)',
+						fontSize: 12.5,
+						fontWeight: 600,
+						borderRadius: 12,
+						padding: '8px 12px',
+					}}
+				>
+					🔥 Эта тарификация действует только до 15 мая
 				</div>
 			)}
-			{/* 👆👆👆👆👆👆👆👆👆👆👆👆👆👆👆👆👆👆👆 */}
 
-			{/* Subscription Plans */}
-			<div className='grid grid-cols-1 gap-5'>
+			<SectionHead title='Тарифы' />
+			<div className='wk-stack'>
 				{plans?.map((p) => {
-					const isActivePlan =
-						status?.hasActiveSubscription &&
-						status?.planType === p.id
+					const isActivePlan = active && status?.planType === p.id
 					const isThisPlanLoading =
 						isMutationLoading && data?.planType === p.id
-
 					return (
-						<button
+						<SheetOption
 							key={p.id}
-							onClick={() => !isActivePlan && buy(p.id)}
-							disabled={isMutationLoading || isActivePlan}
-							className={`group p-8 rounded-[2.5rem] border flex items-center justify-between text-left transition-all shadow-xl relative overflow-hidden ${
-								isActivePlan
-									? 'bg-slate-900 border-slate-900 text-white active:scale-100'
-									: 'bg-white border-slate-100 active:scale-[0.97] shadow-slate-200/30'
-							}`}
-						>
-							<div className='flex-1 pr-4 relative z-10'>
-								<div className='flex items-center gap-2 mb-2'>
-									<span
-										className={`text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest ${
-											isActivePlan
-												? 'bg-emerald-500 text-white'
-												: p.id === 'ONE_MONTH'
-													? 'bg-red-50 text-red-800'
-													: 'bg-slate-50 text-slate-900'
-										}`}
-									>
-										{isActivePlan ? 'Активно' : p.name}
-									</span>
-									<span className='text-2xl'>{p.icon}</span>
-								</div>
-								<h3
-									className={`text-3xl font-black ${isActivePlan ? 'text-white' : 'text-slate-900'}`}
-								>
-									{p.price}
-								</h3>
-								<p className='text-[10px] font-bold uppercase tracking-widest mt-2 opacity-70'>
-									{isActivePlan
-										? 'Ваш текущий тариф'
-										: p.desc}
-								</p>
-							</div>
-
-							{!isActivePlan && (
-								<div className='bg-slate-50 group-hover:bg-slate-900 group-hover:text-white transition-colors p-5 rounded-3xl relative z-10'>
-									{isThisPlanLoading ? (
-										<div className='w-7 h-7 border-[3px] border-slate-900 border-t-transparent group-hover:border-white group-hover:border-t-transparent rounded-full animate-spin'></div>
-									) : (
-										<svg
-											className='w-7 h-7'
-											fill='none'
-											stroke='currentColor'
-											viewBox='0 0 24 24'
-										>
-											<path
-												strokeLinecap='round'
-												strokeLinejoin='round'
-												strokeWidth='3'
-												d='M12 6v12m6-6H6'
-											/>
-										</svg>
+							icon={p.icon}
+							iconBg={
+								p.id === 'ONE_MONTH' ? 'var(--brand-soft)' : 'var(--track)'
+							}
+							title={
+								<span className='flex items-center gap-2'>
+									{p.name}
+									{p.id === 'ONE_MONTH' && !isActivePlan && (
+										<StatusPill tone='brand'>Популярный</StatusPill>
 									)}
-								</div>
-							)}
-						</button>
+									{isActivePlan && (
+										<StatusPill tone='ok'>Активно</StatusPill>
+									)}
+								</span>
+							}
+							subtitle={isActivePlan ? 'Ваш текущий тариф' : p.desc}
+							selected={isActivePlan}
+							disabled={isMutationLoading && !isThisPlanLoading}
+							onClick={() => !isActivePlan && buy(p.id)}
+							right={
+								isThisPlanLoading ? (
+									<span className='wk-spinner' />
+								) : (
+									<span style={{ fontWeight: 700, whiteSpace: 'nowrap' }}>
+										{p.price}
+									</span>
+								)
+							}
+						/>
 					)
 				})}
 			</div>
 
-			{/* Benefits Section */}
-			<div className='p-8 bg-slate-50 rounded-[3rem] space-y-6 border border-slate-100'>
-				<h4 className='text-[11px] font-black text-slate-400 uppercase tracking-[0.25em] text-center'>
-					Привилегии PRO подписки
-				</h4>
-				<div className='grid grid-cols-1 gap-5'>
-					<BenefitItem
-						icon='🔓'
-						title='Контакты без лимита'
-						desc='Смотрите номера всех работодателей без ограничений'
-					/>
-					<BenefitItem
-						icon='⚡'
-						title='Без очереди'
-						desc='Мгновенная модерация ваших публикаций'
-					/>
-				</div>
-			</div>
+			<SectionHead title='Что даёт PRO' />
+			<Panel className='space-y-4'>
+				<BenefitItem
+					icon='🔓'
+					title='Контакты без лимита'
+					desc='Смотрите номера всех работодателей без ограничений'
+				/>
+				<BenefitItem
+					icon='⚡'
+					title='Без очереди'
+					desc='Мгновенная модерация ваших публикаций'
+				/>
+			</Panel>
 		</div>
 	)
 }
@@ -2219,15 +2317,16 @@ const BenefitItem = ({
 	title: string
 	desc: string
 }) => (
-	<div className='flex items-start gap-4'>
-		<div className='w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-2xl shadow-sm border border-slate-50 shrink-0'>
+	<div className='flex items-start' style={{ gap: 14 }}>
+		<span
+			className='flex items-center justify-center shrink-0'
+			style={{ width: 42, height: 42, borderRadius: 14, background: 'var(--soft)', fontSize: 20 }}
+		>
 			{icon}
-		</div>
-		<div className='text-left'>
-			<div className='text-sm font-black text-slate-900 leading-tight'>
-				{title}
-			</div>
-			<div className='text-[11px] text-slate-400 font-bold mt-1'>
+		</span>
+		<div>
+			<div style={{ fontWeight: 600 }}>{title}</div>
+			<div className='wk-xs' style={{ marginTop: 2 }}>
 				{desc}
 			</div>
 		</div>
@@ -2276,6 +2375,7 @@ export const BonusesPage: React.FC<{ telegramId: number }> = ({
 			// Для простоты здесь оставим логику получения через refetch после действия
 			const res = await fetch(
 				`${import.meta.env.VITE_API_BASE_URL}/bot/tasks/${taskId}/check?telegramId=${telegramId}`,
+				{ headers: tg?.initData ? { 'X-Telegram-Init-Data': tg.initData } : {} },
 			).then((r) => r.json())
 			if (res.success) {
 				showToast(`Успешно! Начислено ${res.earned} баллов`, 'success')
@@ -2288,141 +2388,100 @@ export const BonusesPage: React.FC<{ telegramId: number }> = ({
 		}
 	}
 
-	if (isLoading)
-		return (
-			<div className='flex items-center justify-center min-h-[60vh]'>
-				<div className='animate-spin rounded-full h-12 w-12 border-t-2 border-red-800'></div>
-			</div>
-		)
+	if (isLoading) return <Loader />
 
 	return (
-		<div className='px-5 space-y-6 py-6 pb-24 animate-in fade-in duration-500 text-left'>
-			<div className='brand-gradient p-8 rounded-[2.5rem] text-white shadow-2xl brand-shadow flex flex-col items-center text-center space-y-4 relative overflow-hidden'>
-				<div className='absolute -right-4 -top-4 w-24 h-24 bg-white/10 rounded-full blur-2xl'></div>
-				<span className='text-5xl animate-bounce'>🎁</span>
-				<div>
-					<h2 className='text-2xl font-black uppercase tracking-tighter'>
-						Партнерка
-					</h2>
-					<p className='text-slate-200 opacity-80 text-[10px] font-black uppercase tracking-[0.2em]'>
-						Твой пассивный доход
-					</p>
+		<div className='wk-screen wk-enter text-left'>
+			<h1 className='wk-h1'>Бонусы</h1>
+			<p className='wk-sub' style={{ marginTop: 8 }}>
+				Приглашайте друзей и выводите баллы на карту или кошелёк
+			</p>
+
+			<div className='wk-balance' style={{ marginTop: 22 }}>
+				<div style={{ fontSize: 12.5, opacity: 0.7 }}>
+					Заработано на приглашениях
 				</div>
-				<div className='space-y-1'>
-					<div className='bg-white/10 px-6 py-3 rounded-2xl backdrop-blur-md border border-white/20 inline-block'>
-						<span className='text-3xl font-black'>
-							{totalEarned}
-						</span>
-						<span className='text-xs font-bold uppercase ml-2'>
-							баллов
-						</span>
-					</div>
-					<div className='text-white/70 text-[11px] font-black uppercase tracking-[0.2em]'>
-						≈ {somEquivalent} СОМ
-					</div>
+				<div
+					style={{ fontSize: 40, fontWeight: 800, letterSpacing: '-.03em', marginTop: 2 }}
+				>
+					{fmtNum(totalEarned)}
 				</div>
+				<div style={{ fontSize: 14, opacity: 0.8 }}>
+					баллов ≈ {fmtMoney(somEquivalent)} сом · 100 баллов = 5 сом
+				</div>
+				<Button
+					variant='white'
+					block
+					style={{ marginTop: 18 }}
+					onClick={() => navigate('/withdraw')}
+				>
+					Вывести
+				</Button>
 			</div>
 
-			<div className='bg-red-50 border border-red-100 p-5 rounded-[2rem] flex items-center gap-4'>
-				<div className='w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-2xl shadow-sm'>
-					💰
-				</div>
-				<div className='text-left'>
-					<h4 className='text-[10px] font-black text-red-800 uppercase tracking-widest'>
-						Курс обмена
-					</h4>
-					<p className='text-sm font-black text-slate-900 mt-1'>
-						100 баллов = 5 сомов
-					</p>
-					<p className='text-[9px] text-slate-400 font-bold uppercase mt-0.5'>
-						Вывод на карты банков КР и кошельки
-					</p>
-				</div>
+			<div style={{ marginTop: 14 }}>
+				<StatsBlock
+					items={[
+						{ value: fmtNum(info?.referralsCount || 0), label: 'приглашено' },
+						{ value: `+${fmtNum(info?.rewardPerReferral || 0)}`, label: 'за друга' },
+						{ value: fmtMoney(somEquivalent), label: 'сом' },
+					]}
+				/>
 			</div>
 
-			<div className='grid grid-cols-2 gap-4 text-center'>
-				<div className='bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm'>
-					<span className='text-[10px] font-black text-slate-400 uppercase block mb-1'>
-						Приглашено
-					</span>
-					<span className='text-2xl font-black text-slate-900'>
-						{info?.referralsCount || 0}
-					</span>
-					<span className='text-[10px] text-red-800 font-bold block uppercase mt-1'>
-						человек
-					</span>
+			<Panel style={{ marginTop: 14 }}>
+				<div className='wk-h3'>
+					Пригласите друга — +{fmtNum(info?.rewardPerReferral || 0)} баллов
 				</div>
-				<div className='bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm'>
-					<span className='text-[10px] font-black text-slate-400 uppercase block mb-1'>
-						Бонус за друга
-					</span>
-					<span className='text-2xl font-black text-slate-900'>
-						{info?.rewardPerReferral || 0}
-					</span>
-					<span className='text-[10px] text-slate-400 font-bold block uppercase mt-1'>
-						баллов
-					</span>
+				<div className='wk-xs' style={{ marginTop: 4 }}>
+					Когда друг опубликует резюме или вакансию
 				</div>
-			</div>
-
-			<div className='bg-white p-6 rounded-[2.5rem] border border-slate-100 shadow-sm space-y-4 text-center'>
-				<h4 className='text-xs font-black text-slate-400 uppercase tracking-widest'>
-					Твоя ссылка
-				</h4>
-				<div className='flex items-center gap-2 p-2 bg-slate-50 rounded-2xl border border-dashed border-slate-200'>
-					<span className='text-[11px] font-medium text-slate-500 truncate flex-1 pl-2 italic'>
-						{info?.referralLink}
-					</span>
-					<button
-						onClick={() =>
-							info && copyToClipboard(info.referralLink)
-						}
-						className='bg-white p-3 rounded-xl shadow-sm active:scale-90 transition-all'
+				<div
+					className='flex items-center'
+					style={{
+						gap: 8,
+						marginTop: 14,
+						background: 'var(--soft)',
+						borderRadius: 14,
+						padding: '6px 6px 6px 14px',
+					}}
+				>
+					<span className='wk-xs truncate flex-1'>{info?.referralLink}</span>
+					<IconButton
+						label='Копировать'
+						className='wk-iconbtn--plain'
+						style={{ background: 'var(--card)', width: 36, height: 36 }}
+						onClick={() => info && copyToClipboard(info.referralLink)}
 					>
-						📋
-					</button>
-					<button
-						onClick={handleShare}
-						className='bg-slate-900 text-white px-4 py-3 rounded-xl active:scale-95 transition-all font-black text-[10px] uppercase'
-					>
-						Поделиться
-					</button>
+						<Copy size={16} strokeWidth={1.8} />
+					</IconButton>
 				</div>
-			</div>
+				<Button
+					variant='ink'
+					size='sm'
+					block
+					style={{ marginTop: 12 }}
+					onClick={handleShare}
+				>
+					<Send size={16} strokeWidth={1.8} /> Поделиться ссылкой
+				</Button>
+			</Panel>
 
-			<div className='space-y-4'>
-				<h4 className='text-xs font-black text-slate-400 uppercase tracking-widest px-2'>
-					Бонусы за подписки
-				</h4>
-				<div className='bg-white p-5 rounded-[2rem] border border-slate-100 shadow-sm flex items-center justify-between'>
-					<div className='flex items-center gap-4'>
-						<div className='w-12 h-12 bg-slate-50 rounded-2xl flex items-center justify-center text-xl'>
-							✈️
-						</div>
-						<div className='text-left'>
-							<h5 className='text-sm font-black text-slate-900'>
-								Наш канал
-							</h5>
-							<p className='text-[10px] text-red-800 font-bold uppercase'>
-								+50 баллов
-							</p>
-						</div>
-					</div>
-					<button
-						onClick={() => handleTask('tg_sub')}
-						className='text-xs font-black text-slate-900 bg-slate-50 px-5 py-3 rounded-xl active:scale-95 border'
+			<SectionHead title='Задания' />
+			<SheetOption
+				icon='✈️'
+				title='Наш канал'
+				subtitle='+50 баллов за подписку'
+				onClick={() => handleTask('tg_sub')}
+				right={
+					<span
+						className='wk-btn wk-btn--line wk-btn--xs'
+						style={{ pointerEvents: 'none' }}
 					>
 						Проверить
-					</button>
-				</div>
-			</div>
-
-			<button
-				onClick={() => navigate('/withdraw')}
-				className='w-full py-6 bg-slate-900 text-white rounded-[2rem] font-black uppercase tracking-widest text-sm shadow-xl active:scale-95 transition-all'
-			>
-				Вывести баллы 💸
-			</button>
+					</span>
+				}
+			/>
 		</div>
 	)
 }
@@ -2431,6 +2490,8 @@ const AppContent: React.FC = () => {
 	const navigate = useNavigate()
 	const location = useLocation()
 	const [isPlusOpen, setIsPlusOpen] = useState(false)
+	// Лист «Что публикуем?» не должен оставаться открытым после перехода (в т.ч. кнопкой «назад»)
+	useEffect(() => setIsPlusOpen(false), [location.pathname])
 	const { tg, haptic, setHeader } = useTMA()
 
 	// Определяем ID пользователя Telegram
@@ -2446,6 +2507,29 @@ const AppContent: React.FC = () => {
 
 	// 2. Мутация для регистрации
 	const [registerUser] = useRegisterUserMutation()
+	const { data: plusCompany } = useGetMyCompanyQuery(telegramId)
+	// Счётчик на табе «Сделки»: вопросы без ответа + запросы на подтверждение
+	const { data: dealsPending } = useGetDealsPendingQuery(telegramId, { pollingInterval: 60000 })
+
+	// Переход из уведомления бота: ?open=vac_123 | res_123 | gig_123 | svc_123 | company_123 | pro (или start_param Telegram)
+	useEffect(() => {
+		const open =
+			new URLSearchParams(window.location.search).get('open') ||
+			tg?.initDataUnsafe?.start_param
+		if (!open) return
+		const m = /^(vac|res)_(\d+)$/.exec(open)
+		if (m) navigate(`/detail/${m[2]}?type=${m[1] === 'vac' ? 'job' : 'worker'}`)
+		else if (/^gig_\d+$/.test(open)) navigate(`/gig/${open.slice(4)}`)
+		else if (/^svc_\d+$/.test(open)) navigate(`/offer/${open.slice(4)}`)
+		else if (/^company_\d+$/.test(open)) navigate(`/company/${open.slice(8)}`)
+		else if (/^app_\d+$/.test(open)) navigate(`/application/${open.slice(4)}`)
+		else if (open === 'myapps') navigate('/my-applications')
+		else if (open === 'notify') navigate('/notifications')
+		else if (open === 'deals') navigate('/deals')
+		else if (open === 'deals_e') navigate('/deals?tab=employer')
+		else if (open === 'saved') navigate('/saved')
+		else if (open === 'pro') navigate('/subscription')
+	}, [])
 
 	// Логика автоматической регистрации
 	useEffect(() => {
@@ -2505,9 +2589,12 @@ const AppContent: React.FC = () => {
 		syncSafeAreas()
 
 		// 5. Обработка темы
+		// Дизайн Work KG светлый: фон и шапка Telegram в цвет --bg
 		const handleTheme = () => {
-			document.body.style.backgroundColor = tg.themeParams.bg_color
-			if (tg.setHeaderColor) tg.setHeaderColor('secondary_bg_color')
+			document.body.style.backgroundColor = '#F6F5F2'
+			if (tg.setHeaderColor) tg.setHeaderColor('#F6F5F2')
+			if (tg.setBackgroundColor) tg.setBackgroundColor('#F6F5F2')
+			if (tg.setBottomBarColor) tg.setBottomBarColor('#F6F5F2')
 		}
 		tg.onEvent('themeChanged', handleTheme)
 		handleTheme()
@@ -2605,23 +2692,24 @@ const AppContent: React.FC = () => {
 		}
 	}, [navigate, location.pathname])
 
-	const showNav = ['/', '/search', '/profile', '/bonuses', '/games'].includes(
+	const showNav = ['/', '/search', '/companies', '/deals', '/profile', '/bonuses', '/games'].includes(
 		location.pathname,
 	)
 
 	// Если данные еще грузятся — показываем лоадер
-	if (isUserLoading)
-		return (
-			<div className='min-h-screen flex items-center justify-center bg-white'>
-				<div className='w-10 h-10 border-[3px] border-slate-900 border-t-transparent rounded-full animate-spin' />
-			</div>
-		)
+	if (isUserLoading) return <Loader />
+
+	const path = location.pathname
+	const openCreate = (type: 'vac' | 'res') => {
+		setIsPlusOpen(false)
+		navigate('/create', { state: { type } })
+	}
 
 	return (
-		<div className='min-h-screen flex flex-col bg-slate-50 text-slate-900 overflow-x-hidden'>
+		<div className='min-h-screen flex flex-col overflow-x-hidden' style={{ background: 'var(--bg)', color: 'var(--ink)' }}>
 			<main
-				style={{ paddingTop: showNav ? 'var(--sat)' : '0' }}
-				className='flex-1 w-full max-w-xl mx-auto pb-32'
+				style={{ paddingTop: path === '/games' ? 'var(--sat)' : 0 }}
+				className='flex-1 w-full max-w-xl mx-auto'
 			>
 				<Routes>
 					<Route
@@ -2665,149 +2753,176 @@ const AppContent: React.FC = () => {
 						path='/profile-detail'
 						element={<ProfileDetail telegramId={telegramId} />}
 					/>
+					<Route
+						path='/gig/new'
+						element={<GigFormPage telegramId={telegramId} />}
+					/>
+					<Route
+						path='/gig/:id'
+						element={<GigPage telegramId={telegramId} />}
+					/>
+					<Route
+						path='/offer/edit'
+						element={<OfferFormPage telegramId={telegramId} />}
+					/>
+					<Route
+						path='/offer/:id'
+						element={<OfferPage telegramId={telegramId} />}
+					/>
+					<Route
+						path='/companies'
+						element={<CompaniesPage telegramId={telegramId} />}
+					/>
+					<Route
+						path='/company/edit'
+						element={<CompanyFormPage telegramId={telegramId} />}
+					/>
+					<Route
+						path='/company/:id'
+						element={<CompanyPage telegramId={telegramId} />}
+					/>
+					<Route
+						path='/application/:id'
+						element={<ApplicationPage telegramId={telegramId} />}
+					/>
+					<Route
+						path='/applicants/:vacancyId'
+						element={<ApplicantsPage telegramId={telegramId} />}
+					/>
+					<Route
+						path='/my-applications'
+						element={<MyApplicationsPage telegramId={telegramId} />}
+					/>
+					<Route path='/saved' element={<SavedPage telegramId={telegramId} />} />
+					<Route path='/deals' element={<DealsPage telegramId={telegramId} />} />
+					<Route path='/deal/:id/review' element={<ReviewPage telegramId={telegramId} />} />
+					<Route path='/notifications' element={<NotifySettingsPage telegramId={telegramId} />} />
+					<Route
+						path='/following'
+						element={<FollowingPage telegramId={telegramId} />}
+					/>
+					{import.meta.env.DEV && (
+						<Route path='/ui-kit' element={<UiKit />} />
+					)}
 					<Route path='*' element={<Navigate to='/' replace />} />
 				</Routes>
 			</main>
 			{showNav && (
-				<nav
-					className='fixed left-1/2 -translate-x-1/2 w-[94%] max-w-md z-50 animate-in slide-in-from-bottom-10 duration-500'
-					style={{ bottom: 'calc(var(--sab) + 16px)' }}
-				>
-					<div className='bg-secondary/80 backdrop-blur-3xl border border-white/10 rounded-[2.8rem] p-2 flex justify-between items-center shadow-[0_20px_50px_rgba(0,0,0,0.3)]'>
-						<NavTab
-							active={location.pathname === '/'}
-							icon={<Home size={22} />}
-							label='Дом'
-							onClick={() => navigate('/')}
-						/>
-						<NavTab
-							active={location.pathname === '/search'}
-							icon={<Search size={22} />}
-							label='Поиск'
-							onClick={() => navigate('/search')}
-						/>
-
-						<button
-							onClick={() => {
-								haptic.impact('heavy')
-								setIsPlusOpen(true)
-							}}
-							className='relative -top-8 w-16 h-16 bg-red-700 text-white rounded-full flex items-center justify-center shadow-2xl active:scale-90 transition-transform border-4 border-white dark:border-zinc-900'
-						>
-							<Plus size={32} strokeWidth={3} />
-						</button>
-
-						<NavTab
-							active={location.pathname === '/bonuses'}
-							icon={<Star size={22} />}
-							label='Бонусы'
-							onClick={() => navigate('/bonuses')}
-						/>
-						<NavTab
-							active={location.pathname === '/profile'}
-							icon={<UserIcon />}
-							label='Профиль'
-							onClick={() => navigate('/profile')}
-						/>
-					</div>
+				<nav className='wk-tabbar' aria-label='Навигация'>
+					<NavTab
+						active={path === '/'}
+						icon={<Home size={22} strokeWidth={1.8} />}
+						label='Главная'
+						onClick={() => navigate('/')}
+					/>
+					<NavTab
+						active={path === '/companies'}
+						icon={<Building2 size={22} strokeWidth={1.8} />}
+						label='Компании'
+						onClick={() => navigate('/companies')}
+					/>
+					<button
+						aria-label='Создать'
+						onClick={() => {
+							haptic.impact('medium')
+							setIsPlusOpen(true)
+						}}
+						className='wk-tabbar__plus'
+					>
+						<Plus size={22} strokeWidth={2} />
+					</button>
+					<NavTab
+						active={path === '/deals'}
+						icon={<BriefcaseBusiness size={22} strokeWidth={1.8} />}
+						label='Сделки'
+						badge={dealsPending?.count}
+						onClick={() => navigate('/deals')}
+					/>
+					<NavTab
+						active={path === '/profile'}
+						icon={<UserLucide size={22} strokeWidth={1.8} />}
+						label='Профиль'
+						onClick={() => navigate('/profile')}
+					/>
 				</nav>
 			)}
-			<NativeBottomSheet
-				isOpen={isPlusOpen}
+			<Sheet
+				open={isPlusOpen}
 				onClose={() => setIsPlusOpen(false)}
-				title='Публикация'
+				title='Что публикуем?'
 			>
-				<div className='space-y-3'>
-					<ActionButton
-						icon='💼'
+				<div className='wk-stack'>
+					<SheetOption
+						icon={<BriefcaseBusiness size={22} strokeWidth={1.8} />}
+						iconBg='var(--ink)'
+						iconColor='#fff'
 						title='Вакансия'
-						sub='Ищу сотрудника'
-						onClick={() => {
-							setIsPlusOpen(false)
-							navigate('/create', { state: { type: 'vac' } })
-						}}
+						subtitle='Ищу сотрудника в штат'
+						onClick={() => openCreate('vac')}
 					/>
-					<ActionButton
-						icon='📄'
+					<SheetOption
+						icon={<FileText size={22} strokeWidth={1.8} />}
 						title='Резюме'
-						sub='Ищу работу'
+						subtitle='Ищу постоянную работу'
+						onClick={() => openCreate('res')}
+					/>
+					<SheetOption
+						icon={<Zap size={22} strokeWidth={1.8} />}
+						iconBg='var(--gig-soft)'
+						iconColor='var(--gig)'
+						title='Разовое задание'
+						subtitle='Нужен человек на пару часов или день'
 						onClick={() => {
 							setIsPlusOpen(false)
-							navigate('/create', { state: { type: 'res' } })
+							navigate('/gig/new')
+						}}
+					/>
+					<SheetOption
+						icon={<Wrench size={22} strokeWidth={1.8} />}
+						iconBg='var(--ok-soft)'
+						iconColor='var(--ok)'
+						title='Мои услуги'
+						subtitle='Готов к подработке'
+						onClick={() => {
+							setIsPlusOpen(false)
+							navigate('/offer/edit')
+						}}
+					/>
+					<SheetOption
+						icon={<Building2 size={22} strokeWidth={1.8} />}
+						iconBg='#E8F1FD'
+						iconColor='var(--tick)'
+						title={plusCompany ? 'Моя компания' : 'Компания'}
+						subtitle={
+							plusCompany
+								? `${plusCompany.name} · фото, описание, отзывы`
+								: 'Профиль работодателя с фото и отзывами'
+						}
+						onClick={() => {
+							setIsPlusOpen(false)
+							navigate(plusCompany ? `/company/${plusCompany.id}` : '/company/edit')
 						}}
 					/>
 				</div>
-			</NativeBottomSheet>
+			</Sheet>
 		</div>
 	)
 }
 
-const ActionButton = ({ icon, title, sub, onClick }: any) => (
-	<button
-		onClick={() => {
-			tg.HapticFeedback.impactOccurred('medium')
-			onClick()
-		}}
-		className='w-full flex items-center gap-4 p-5 bg-secondary rounded-[2rem] active:scale-95 transition-all'
-	>
-		<div className='w-12 h-12 bg-main rounded-2xl flex items-center justify-center text-2xl shadow-sm'>
-			{icon}
-		</div>
-		<div className='text-left'>
-			<div className='font-black text-main text-lg leading-tight'>
-				{title}
-			</div>
-			<div className='text-[10px] text-hint font-bold uppercase tracking-widest'>
-				{sub}
-			</div>
-		</div>
-	</button>
-)
-
-const NativeBottomSheet = ({ isOpen, onClose, title, children }: any) => {
-	if (!isOpen) return null
-	return (
-		<div className='fixed inset-0 z-[100] flex items-end justify-center animate-in fade-in duration-300'>
-			<div
-				className='absolute inset-0 bg-black/50 backdrop-blur-sm'
-				onClick={onClose}
-			/>
-			<div
-				className='relative w-full max-w-xl bg-main rounded-t-[2.5rem] p-8 animate-in slide-in-from-bottom duration-500 shadow-2xl'
-				style={{ paddingBottom: 'calc(var(--sab) + 2rem)' }}
-			>
-				<div className='w-12 h-1.5 bg-secondary rounded-full mx-auto mb-8 opacity-40' />
-				<div className='flex justify-between items-center mb-8'>
-					<h2 className='text-2xl font-black text-main tracking-tighter'>
-						{title}
-					</h2>
-					<button
-						onClick={onClose}
-						className='p-2 bg-secondary rounded-full text-hint'
-					>
-						✕
-					</button>
-				</div>
-				{children}
-			</div>
-		</div>
-	)
-}
-
-const NavTab = ({ active, icon, label, onClick }: any) => {
+const NavTab = ({ active, icon, label, onClick, badge }: any) => {
 	const handleClick = () => {
-		tg.HapticFeedback.selectionChanged()
+		tg?.HapticFeedback?.selectionChanged()
 		onClick()
 	}
 	return (
 		<button
 			onClick={handleClick}
-			className={`flex flex-col items-center justify-center flex-1 gap-1 transition-all ${active ? 'text-red-700 scale-110' : 'text-hint'}`}
+			aria-current={active ? 'page' : undefined}
+			className={cx('wk-tabbar__item', active && 'is-active')}
 		>
 			{icon}
-			<span className='text-[9px] font-black uppercase tracking-tighter'>
-				{label}
-			</span>
+			<span>{label}</span>
+			{badge > 0 && <span className='wk-tabbar__badge'>{badge > 9 ? '9+' : badge}</span>}
 		</button>
 	)
 }

@@ -1,0 +1,868 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Work KG — Premium</title>
+<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F6F5F2; --card:#FFFFFF; --ink:#0E0E10; --ink2:#3F3F46; --muted:#8A8A93; --line:#ECEBE6;
+  --brand:#B4161B; --brand-soft:#FBEDED; --ok:#0E9F6E; --ok-soft:#E8F6EF; --tick:#1D9BF0;
+  --gig:#5B4BDB; --gig-soft:#EFEDFD; --star:#E8A317;
+  --sh:0 1px 2px rgba(14,14,16,.04),0 10px 30px rgba(14,14,16,.06);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font-family:Onest,Inter,system-ui,sans-serif;background:#DCDAD5;color:var(--ink);display:flex;align-items:center;justify-content:center;-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
+input,textarea{font:inherit;color:inherit}
+.phone{width:390px;height:844px;background:var(--bg);border-radius:46px;overflow:hidden;position:relative;box-shadow:0 40px 100px rgba(0,0,0,.28),0 0 0 10px #0E0E10}
+@media (max-width:480px){body{display:block;background:var(--bg)}.phone{width:100%;height:100dvh;border-radius:0;box-shadow:none}}
+.screen{position:absolute;inset:0;overflow-y:auto;padding:18px 20px 120px;display:none;scrollbar-width:none}
+.screen::-webkit-scrollbar{display:none}
+.screen.active{display:block;animation:in .22s ease}
+.screen.flush{padding:0 0 120px}
+@keyframes in{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+h1{font-size:30px;line-height:1.08;font-weight:800;letter-spacing:-.035em}
+h2{font-size:20px;font-weight:700;letter-spacing:-.02em}
+h3{font-size:16px;font-weight:600;letter-spacing:-.01em}
+.muted{color:var(--muted)} .s{font-size:14px} .xs{font-size:12.5px}
+.row{display:flex;align-items:center;gap:8px}.between{justify-content:space-between}
+.pad{padding:0 20px}
+.sec{display:flex;justify-content:space-between;align-items:baseline;margin:30px 0 14px}
+.sec a{font-size:14px;font-weight:600;color:var(--muted);cursor:pointer}
+
+/* header */
+.hdr{display:flex;align-items:center;gap:10px}
+.me-ava{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,#34D399,#059669);color:#fff;display:grid;place-items:center;font-weight:700}
+.ibtn{width:42px;height:42px;border-radius:50%;background:var(--card);display:grid;place-items:center;box-shadow:var(--sh);position:relative;flex:none}
+.ibtn .dot{position:absolute;top:10px;right:11px;width:8px;height:8px;border-radius:50%;background:var(--brand);border:2px solid #fff}
+.ibtn.glass{background:rgba(255,255,255,.18);backdrop-filter:blur(10px);color:#fff;box-shadow:none}
+
+.searchbar{display:flex;align-items:center;gap:10px;background:var(--card);border-radius:18px;height:56px;padding:0 18px;color:var(--muted);box-shadow:var(--sh);margin-top:20px;cursor:text}
+.searchbar input{border:0;outline:0;background:none;flex:1;font-size:16px;color:var(--ink)}
+
+.tabs{display:flex;gap:22px;margin-top:22px;border-bottom:1px solid var(--line)}
+.tabs button{padding:0 0 12px;font-size:15px;font-weight:600;color:var(--muted);position:relative}
+.tabs button.on{color:var(--ink)}
+.tabs button.on::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:2px;background:var(--ink);border-radius:2px}
+
+.chips{display:flex;gap:8px;overflow-x:auto;margin:16px -20px 0;padding:0 20px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;height:38px;padding:0 16px;border-radius:999px;background:transparent;border:1px solid #DAD8D2;font-size:14px;font-weight:500;color:var(--ink2)}
+.chip.on{background:var(--ink);border-color:var(--ink);color:#fff}
+
+/* company cover */
+.cover{position:relative;overflow:hidden;color:#fff}
+.cover .mono{position:absolute;right:-10px;bottom:-34px;font-size:150px;font-weight:800;letter-spacing:-.06em;opacity:.13;line-height:1}
+.cover .grain{position:absolute;inset:0;opacity:.18;mix-blend-mode:overlay;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+.cover .ph{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.cover .shade{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.25),rgba(0,0,0,0) 35%,rgba(0,0,0,.55))}
+.cover>button,.cover>span,.cover>.tagline{position:relative;z-index:2}
+.strip{display:flex;gap:8px;overflow-x:auto;margin:14px -20px 0;padding:0 20px;scrollbar-width:none}
+.strip::-webkit-scrollbar{display:none}
+.tile{flex:none;width:150px;height:118px;border-radius:16px;position:relative;overflow:hidden;color:#fff;font-size:12px;font-weight:600;display:flex;align-items:flex-end;padding:10px}
+.tile.add{background:var(--card);border:1.5px dashed #CFCDC6;color:var(--ink2);flex-direction:column;align-items:center;justify-content:center;gap:6px;cursor:pointer}
+.logo{border-radius:16px;display:grid;place-items:center;color:#fff;font-weight:800;letter-spacing:-.04em;flex:none}
+.tick{display:inline-grid;place-items:center;width:16px;height:16px;border-radius:50%;background:var(--tick);color:#fff;flex:none}
+
+.hs{display:flex;gap:14px;overflow-x:auto;margin:0 -20px;padding:0 20px 6px;scrollbar-width:none;scroll-snap-type:x mandatory}
+.hs::-webkit-scrollbar{display:none}
+.co-card{flex:none;width:280px;border-radius:26px;background:var(--card);box-shadow:var(--sh);overflow:hidden;cursor:pointer;scroll-snap-align:start}
+.co-card .cover{height:150px;padding:16px;display:flex;flex-direction:column;justify-content:space-between}
+.co-card .cover .tagline{font-size:13px;font-weight:600;opacity:.9;max-width:70%}
+.co-card .body{padding:14px 16px 16px;display:flex;gap:12px;align-items:center}
+
+/* job card */
+.job{background:var(--card);border-radius:22px;padding:18px;box-shadow:var(--sh);cursor:pointer;transition:transform .12s}
+.job:active{transform:scale(.985)}
+.job+.job{margin-top:12px}
+.job .t{font-size:17px;font-weight:700;letter-spacing:-.015em}
+.job .co{display:flex;align-items:center;gap:6px;font-size:14px;color:var(--ink2);margin-top:3px}
+.job .sal{font-size:17px;font-weight:700;margin-top:14px}
+.job .meta{font-size:13.5px;color:var(--muted);margin-top:4px}
+.heart{color:#C7C5BF}.heart.on{color:var(--brand)}
+
+.gig{display:flex;gap:14px;align-items:center;padding:14px 0;border-bottom:1px solid var(--line);cursor:pointer}
+.gig:last-child{border:0}
+.gig .when{width:56px;height:56px;border-radius:16px;background:var(--gig-soft);color:var(--gig);display:flex;flex-direction:column;align-items:center;justify-content:center;flex:none;font-weight:700;line-height:1.1}
+.gig .when small{font-size:11px;font-weight:600}
+
+.panel{background:var(--card);border-radius:24px;padding:18px;box-shadow:var(--sh)}
+.rating{display:inline-flex;align-items:center;gap:4px;font-weight:600;font-size:14px}
+.rating svg{color:var(--star)}
+
+/* detail / company hero */
+.hero{height:230px;padding:18px 20px;display:flex;justify-content:space-between;align-items:flex-start}
+.hero-logo{margin:-38px 0 0 20px;position:relative;z-index:2;border:4px solid var(--bg);border-radius:22px}
+.facts{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:20px}
+.fact{background:var(--card);border-radius:18px;padding:14px 12px;box-shadow:var(--sh)}
+.fact span{display:block;font-size:12px;color:var(--muted)}
+.fact b{display:block;font-size:15px;margin-top:4px;font-weight:700}
+.perks{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.perk{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:9px 12px;font-size:14px;font-weight:500;display:flex;gap:6px;align-items:center}
+.prose{font-size:15.5px;line-height:1.6;color:var(--ink2)}
+.prose ul{padding-left:18px;margin-top:8px}.prose li{margin-top:4px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);margin-top:18px;background:var(--card);border-radius:22px;box-shadow:var(--sh)}
+.stats div{padding:16px 8px;text-align:center}
+.stats div+div{border-left:1px solid var(--line)}
+.stats b{display:block;font-size:20px;font-weight:800;letter-spacing:-.02em}
+.stats span{font-size:12px;color:var(--muted)}
+.gallery{display:grid;grid-template-columns:2fr 1fr;grid-template-rows:90px 90px;gap:8px;margin-top:14px}
+.gallery div{border-radius:16px;position:relative;overflow:hidden;color:#fff;font-size:12px;font-weight:600;padding:10px;display:flex;align-items:flex-end}
+.gallery div:first-child{grid-row:span 2}
+.rev{background:var(--card);border-radius:20px;padding:16px;box-shadow:var(--sh)}
+.rev+.rev{margin-top:10px}
+.rev p{font-size:14.5px;line-height:1.55;color:var(--ink2);margin-top:10px}
+.verified{display:inline-flex;align-items:center;gap:5px;font-size:12.5px;color:var(--ok);font-weight:600;margin-top:10px}
+.bar{display:flex;align-items:center;gap:10px;font-size:14px;margin-top:10px}
+.bar .t{width:150px;color:var(--ink2)}
+.bar .b{flex:1;height:6px;background:#F1F0EC;border-radius:6px;overflow:hidden}
+.bar .b i{display:block;height:100%;background:var(--ink);border-radius:6px}
+
+/* buttons */
+.cta{position:absolute;left:0;right:0;bottom:0;padding:14px 20px 26px;background:linear-gradient(rgba(246,245,242,0),var(--bg) 35%);z-index:6}
+.btn{height:54px;border-radius:18px;font-weight:700;font-size:16px;display:flex;align-items:center;justify-content:center;gap:8px;padding:0 18px}
+.btn.ink{background:var(--ink);color:#fff}.btn.red{background:var(--brand);color:#fff}
+.btn.wa{background:#128C7E;color:#fff;flex:1}.btn.tg{background:#229ED9;color:#fff;flex:1}
+.btn.line{background:var(--card);border:1px solid var(--line)}
+.btn.sm{height:42px;font-size:14px;border-radius:14px}
+.btn.block{width:100%}
+.note{font-size:13px;color:var(--muted);line-height:1.45;text-align:center;margin-top:8px}
+
+/* deals */
+.status{display:inline-block;font-size:12px;font-weight:700;padding:5px 10px;border-radius:999px}
+.st0{background:#FEF3C7;color:#92400E}.st1{background:var(--gig-soft);color:var(--gig)}.st2{background:var(--brand-soft);color:var(--brand)}.st3{background:#F1F0EC;color:var(--muted)}
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin-top:16px}
+.steps i{height:4px;border-radius:4px;background:#ECEBE6}.steps i.on{background:var(--ink)}
+.steplbl{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;font-size:11px;color:var(--muted);margin-top:6px}
+.steplbl .cur{color:var(--ink);font-weight:700}
+.bot{background:#F5F4F0;border-radius:16px;padding:14px;margin-top:14px}
+.applicant{display:flex;gap:12px;align-items:center;padding:12px 0;border-top:1px solid var(--line)}
+.stars{display:flex;gap:8px;margin-top:10px}
+.stars button{width:46px;height:46px;border-radius:14px;background:#F5F4F0;display:grid;place-items:center;color:#D4D2CC}
+.stars button.on{color:var(--star);background:#FDF5E2}
+textarea,.field input{width:100%;border:1px solid var(--line);background:var(--card);border-radius:16px;padding:15px;font-size:16px;outline:0}
+textarea{min-height:110px;resize:none}
+textarea:focus,.field input:focus{border-color:var(--ink)}
+.field{margin-top:18px}
+.field label{display:block;font-size:13.5px;font-weight:600;color:var(--ink2);margin-bottom:8px}
+.field .hint{font-size:12.5px;color:var(--muted);margin-top:6px}
+.field.err input{border-color:var(--brand)}.field.err .hint{color:var(--brand)}
+
+/* profile */
+.menu{background:var(--card);border-radius:22px;box-shadow:var(--sh);margin-top:14px;overflow:hidden}
+.mi{display:flex;align-items:center;gap:14px;padding:16px 18px;cursor:pointer}
+.mi+.mi{border-top:1px solid var(--line)}
+.mi .g{flex:1;font-weight:600;font-size:15px}
+.balance{border-radius:26px;padding:22px;color:#fff;background:radial-gradient(120% 90% at 100% 0%,#B4161B,transparent 60%),linear-gradient(135deg,#0E0E10,#2A0B0C)}
+.bank{display:flex;gap:10px;align-items:center;background:var(--card);border-radius:16px;padding:12px;border:2px solid transparent;text-align:left;box-shadow:var(--sh)}
+.bank.on{border-color:var(--ink)}
+.bank i{width:34px;height:34px;border-radius:10px;color:#fff;display:grid;place-items:center;font-style:normal;font-weight:800;flex:none}
+
+/* nav */
+.nav{position:absolute;left:16px;right:16px;bottom:16px;height:70px;background:rgba(14,14,16,.94);backdrop-filter:blur(14px);border-radius:26px;display:flex;align-items:center;padding:0 6px;z-index:10;box-shadow:0 14px 40px rgba(14,14,16,.3)}
+.nav button{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;font-size:11px;font-weight:500;color:#7B7B84;height:100%;justify-content:center;position:relative}
+.nav button.on{color:#fff}
+.nav .fab{flex:none;width:52px;height:52px;border-radius:18px;background:#fff;color:var(--ink);margin:0 4px}
+.nav .badge{position:absolute;top:12px;left:calc(50% + 6px);background:var(--brand);color:#fff;font-size:10px;min-width:17px;height:17px;border-radius:9px;display:grid;place-items:center;padding:0 4px;font-weight:700}
+.nav.hide{display:none}
+
+.overlay{position:absolute;inset:0;background:rgba(14,14,16,.5);z-index:20;display:none;align-items:flex-end}
+.overlay.on{display:flex}
+.sheet{background:var(--bg);width:100%;border-radius:30px 30px 0 0;padding:12px 20px 30px;animation:up .22s ease}
+@keyframes up{from{transform:translateY(40px)}to{transform:none}}
+.grab{width:40px;height:5px;border-radius:3px;background:#D4D2CC;margin:0 auto 18px}
+.opt{display:flex;gap:14px;align-items:center;background:var(--card);border-radius:20px;padding:16px;margin-top:10px;cursor:pointer;box-shadow:var(--sh)}
+.opt .ic{width:46px;height:46px;border-radius:14px;display:grid;place-items:center;flex:none}
+.opt b{display:block;font-size:16px}.opt span{font-size:13.5px;color:var(--muted)}
+
+.toast{position:absolute;left:20px;right:20px;bottom:100px;background:var(--ink);color:#fff;border-radius:16px;padding:14px 16px;font-size:14px;z-index:30;opacity:0;transform:translateY(10px);transition:.25s;pointer-events:none}
+.toast.on{opacity:1;transform:none}
+</style>
+</head>
+<body>
+<div class="phone">
+
+<section class="screen active" id="nojs" style="display:flex;flex-direction:column;justify-content:center;text-align:center;gap:12px">
+  <div style="font-size:40px">📱</div><h2>Откройте прототип по ссылке</h2>
+  <p class="s muted" style="line-height:1.5">Просмотр файлов на iPhone не запускает интерактивные страницы. Откройте ссылку на прототип в Safari или Chrome.</p></section>
+<section class="screen" id="home"></section>
+<section class="screen" id="companies"></section>
+<section class="screen flush" id="company"></section>
+<section class="screen flush" id="detail"></section>
+<section class="screen" id="deals"></section>
+<section class="screen" id="review"></section>
+<section class="screen" id="me"></section>
+<section class="screen" id="bonus"></section>
+<section class="screen" id="withdraw"></section>
+<section class="screen" id="newgig"></section>
+<section class="screen" id="cands"></section>
+<section class="screen" id="form"></section>
+<section class="screen flush" id="bot"></section>
+
+<nav class="nav" id="nav">
+  <button data-s="home" class="on" onclick="go('home',null,1)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg>Главная</button>
+  <button data-s="companies" onclick="go('companies',null,1)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M9 7h1M14 7h1M9 11h1M14 11h1M9 15h1M14 15h1M10 21v-3h4v3"/></svg>Компании</button>
+  <button class="fab" onclick="sheet(1)" aria-label="Создать"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg></button>
+  <button data-s="deals" onclick="go('deals',null,1)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16v12H4z"/><path d="M9 7V5h6v2"/><path d="m9 13 2 2 4-4"/></svg>Сделки<span class="badge" id="dealBadge">2</span></button>
+  <button data-s="me" onclick="go('me',null,1)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>Профиль</button>
+</nav>
+
+<div class="overlay" id="sheet" onclick="if(event.target===this)sheet(0)">
+  <div class="sheet">
+    <div class="grab"></div>
+    <h2>Что публикуем?</h2>
+    <div class="opt" onclick="sheet(0);openForm('vac')"><div class="ic" style="background:var(--ink);color:#fff"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5h6v2"/></svg></div><div><b>Вакансия</b><span>Ищу сотрудника в штат</span></div></div>
+    <div class="opt" onclick="sheet(0);openForm('res')"><div class="ic" style="background:#F1F0EC"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 13h7M9 17h5"/></svg></div><div><b>Резюме</b><span>Ищу постоянную работу</span></div></div>
+    <div class="opt" onclick="sheet(0);openForm('gig')"><div class="ic" style="background:var(--gig-soft);color:var(--gig)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg></div><div><b>Разовое задание</b><span>Нужен человек на пару часов или день</span></div></div>
+    <div class="opt" onclick="sheet(0);openForm('svc')"><div class="ic" style="background:var(--ok-soft);color:var(--ok)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 6a4 4 0 0 0 5 5l-9 9a2 2 0 0 1-3-3l9-9a4 4 0 0 0-2-2z"/></svg></div><div><b>Мои услуги</b><span>Готов к подработке</span></div></div>
+  </div>
+</div>
+<div class="overlay" id="gsheet" onclick="if(event.target===this)this.classList.remove('on')"><div class="sheet" id="gsheetBody" style="max-height:85%;overflow-y:auto"></div></div>
+<input type="file" id="upInput" accept="image/*" hidden onchange="onPhoto(event)">
+<div class="toast" id="toast"></div>
+</div>
+
+<script>
+/* ---------- icons ---------- */
+const P={
+ home:'<path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/>',
+ building:'<rect x="4" y="3" width="16" height="18" rx="2"/><path d="M9 7h1M14 7h1M9 11h1M14 11h1M9 15h1M14 15h1M10 21v-3h4v3"/>',
+ search:'<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>',
+ plus:'<path d="M12 5v14M5 12h14"/>',
+ deal:'<path d="M4 7h16v12H4z"/><path d="M9 7V5h6v2"/><path d="m9 13 2 2 4-4"/>',
+ user:'<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/>',
+ back:'<path d="M15 5l-7 7 7 7"/>',
+ right:'<path d="m9 6 6 6-6 6"/>',
+ bell:'<path d="M6 8a6 6 0 0 1 12 0c0 7 3 8 3 8H3s3-1 3-8"/><path d="M10 20a2 2 0 0 0 4 0"/>',
+ star:'<path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1 6.2L12 17.3 6.5 20.2l1-6.2L3 9.6l6.2-.9z" fill="currentColor"/>',
+ heart:'<path d="M12 20s-7-4.5-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.5-7 10-7 10z"/>',
+ heartf:'<path d="M12 20s-7-4.5-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.5-7 10-7 10z" fill="currentColor"/>',
+ share:'<path d="M12 3v13M7 8l5-5 5 5M5 14v6h14v-6"/>',
+ check:'<path d="m5 12 5 5 9-10"/>',
+ brief:'<rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5h6v2"/>',
+ doc:'<path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 13h7M9 17h5"/>',
+ bolt:'<path d="M13 2 4 14h7l-1 8 9-12h-7z"/>',
+ tool:'<path d="M14 6a4 4 0 0 0 5 5l-9 9a2 2 0 0 1-3-3l9-9a4 4 0 0 0-2-2z"/>',
+ gift:'<rect x="3" y="8" width="18" height="4"/><path d="M5 12v9h14v-9M12 8v13"/>',
+ gem:'<path d="M6 3h12l3 6-9 12L3 9z"/><path d="M3 9h18"/>',
+ gear:'<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M5 19l2-2M17 7l2-2"/>',
+ list:'<path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/>',
+ pin:'<path d="M12 21s-7-6-7-11a7 7 0 0 1 14 0c0 5-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/>',
+ shield:'<path d="M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6z"/><path d="m9 12 2 2 4-4"/>'
+};
+const ic=(n,s=22,sw=1.8)=>`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${sw}" stroke-linecap="round" stroke-linejoin="round">${P[n]}</svg>`;
+document.querySelector('.phone').innerHTML=document.querySelector('.phone').innerHTML.replace(/__(\w+)__/g,(m,n)=>P[n]?ic(n):m);
+const plur=(n,a,b,c)=>{const m=n%10,h=n%100;return n+' '+(m===1&&h!==11?a:m>=2&&m<=4&&(h<12||h>14)?b:c)};
+const tick=`<span class="tick">${ic('check',10,3.5)}</span>`;
+const star=(r,c)=>r?`<span class="rating">${ic('star',15)}${r.toFixed(1)}${c!=null?`<span class="muted" style="font-weight:400">(${c})</span>`:''}</span>`:'<span class="xs muted">Новичок</span>';
+
+/* ---------- data (компании вымышленные, для прототипа) ---------- */
+const CO={
+ tash:{name:'Tash Kitchen',type:'Ресторан турецкой кухни',cat:'rest',c1:'#2A0A09',c2:'#B4161B',L:'TK',r:4.8,rc:64,pay:99,staff:'120+',since:'2023',hired:46,tag:'Ищем людей, которые любят гостей',
+   about:'Три ресторана в Бишкеке с открытой кухней и живым огнём. Обучаем с нуля, растим своих: 70% управляющих начинали официантами.',
+   perks:['🍽 Питание','👔 Форма','💸 Чаевые','📈 Рост до менеджера'],place:['Зал на Тыналиева','Кухня','Терраса']},
+ nomad:{name:'Nomad Coffee',type:'Сеть кофеен · 9 точек',cat:'cafe',c1:'#1E130C',c2:'#9A6A43',L:'N',r:4.7,rc:38,pay:100,staff:'80+',since:'2022',hired:31,tag:'Кофе, который знают по имени',
+   about:'Обжариваем зерно сами и учим бариста в собственной академии. Гибкий график для студентов.',perks:['☕ Бесплатный кофе','🎓 Академия бариста','🕒 Гибкий график'],place:['Обжарочный цех','Кофейня в ЦУМе','Академия']},
+ orda:{name:'Orda Hotel',type:'Отель 5★',cat:'hotel',c1:'#0B1626',c2:'#2F5F8F',L:'O',r:4.9,rc:22,pay:100,staff:'200+',since:'2024',hired:18,tag:'Сервис мирового уровня',
+   about:'Отель для деловых гостей в центре Бишкека. Стандарты международной сети, обучение английскому за счёт компании.',perks:['🍽 Питание','🚐 Развозка','🇬🇧 Английский','🩺 Медстраховка'],place:['Лобби','Номер','Ресторан']},
+ alatoo:{name:'Alatoo Tech',type:'IT-продукт · финтех',cat:'it',c1:'#0F0F14',c2:'#4F46E5',L:'A',r:4.6,rc:17,pay:100,staff:'60',since:'2024',hired:9,tag:'Строим платежи для Центральной Азии',
+   about:'Продуктовая команда: платёжный шлюз и B2B-решения для банков. Java, Kafka, PostgreSQL, Kubernetes.',perks:['🏠 Гибрид','💻 MacBook','📚 Бюджет на обучение','🩺 Медстраховка'],place:['Офис','Опен-спейс','Переговорная']},
+ kok:{name:'Kök Market',type:'Сеть супермаркетов',cat:'market',c1:'#052E22',c2:'#0E9F6E',L:'K',r:4.4,rc:91,pay:96,staff:'500+',since:'2023',hired:120,tag:'Свежее каждый день',
+   about:'24 магазина по городу. Берём без опыта, обучаем за неделю, официальное оформление с первого дня.',perks:['📄 Официально','🛒 Скидка 15%','🚐 Развозка'],place:['Магазин','Склад','Касса']}
+};
+Object.assign(CO,{
+ akjol:{name:'Ak-Jol Textile',type:'Швейный цех · экспорт',cat:'sew',c1:'#1F1235',c2:'#7C3AED',L:'AJ',r:4.5,rc:47,pay:97,staff:'300+',since:'2023',hired:64,tag:'Шьём для Европы и России',
+   about:'Швейное производство полного цикла. Сдельная оплата, выплаты каждые 2 недели, обучаем швей с нуля.',perks:['🍽 Обеды','🚐 Развозка','📄 Официально','💰 Сдельная'],place:['Цех','Раскрой','ОТК']},
+ shifa:{name:'Shifa Clinic',type:'Многопрофильная клиника',cat:'med',c1:'#062A30',c2:'#0891B2',L:'S',r:4.7,rc:26,pay:100,staff:'90',since:'2024',hired:14,tag:'Медицина с заботой',
+   about:'Клиника на 40 кабинетов: диагностика, стоматология, педиатрия. Помогаем с повышением квалификации.',perks:['🩺 Медстраховка','🎓 Обучение','📄 Официально'],place:['Ресепшн','Кабинет','Лаборатория']}
+});
+/* Фото: заглушки из Unsplash. В реальном приложении компания загружает свои фото. Если фото не загрузилось — остаётся фирменный градиент. */
+const U=id=>`https://images.unsplash.com/photo-${id}?w=900&q=70&auto=format&fit=crop`;
+const PH={tash:['1517248135467-4c7edcad34c4','1414235077428-338989a2e8c0','1556910103-1c02745aae4d','1555396273-367ea4eb4db5'],
+ nomad:['1501339847302-ac426a4a7cbb','1495474472287-4d71bcdd2085','1554118811-1e0d58224f24','1442512595331-e89e73853f31'],
+ orda:['1566073771259-6a8506099945','1542314831-068cd1dbfeeb','1582719478250-c89cae4dc85b','1551882547-ff40c63fe5fa'],
+ alatoo:['1497366216548-37526070297c','1522071820081-009f0129c71c','1497215728101-856f4ea42174','1531482615713-2afd69097998'],
+ kok:['1604719312566-8912e9227c6a','1542838132-92c53300491e','1578916171728-46686eac8d58','1534723452862-4c874018d66d'],
+ akjol:['1558769132-cb1aea458c5e','1556905055-8f358a7a47b2','1620799140408-edc6dcb6d633','1590736969955-71cc94901144'],
+ shifa:['1519494026892-80bbd2d6fd0d','1584515933487-779824d29309','1576091160399-112ba8d25d1d','1538108149393-fbbd81895907']};
+Object.entries(PH).forEach(([k,a])=>CO[k].img=a.map(U));
+const MY_CO='tash';
+const coverImg=c=>c.img&&c.img[0]?`<img class="ph" src="${c.img[0]}" alt="" loading="lazy" onerror="this.nextElementSibling&&this.nextElementSibling.remove();this.remove()"><div class="shade"></div>`:'';
+let upTarget=null;
+function pickPhoto(k,mode){upTarget={k,mode};const i=document.getElementById('upInput');i.value='';i.click()}
+function onPhoto(e){const f=e.target.files&&e.target.files[0];if(!f||!upTarget)return;if(f.size>8e6){toast('Фото больше 8 МБ — выберите поменьше');return}
+  const r=new FileReader();r.onload=()=>{const c=CO[upTarget.k];if(upTarget.mode==='cover')c.img[0]=r.result;else{c.img.push(r.result);c.place.push('')}
+    company();toast(upTarget.mode==='cover'?'Обложка обновлена':'Фото добавлено в галерею')};r.readAsDataURL(f)}
+const JOBS=[
+ {id:'j7',co:'akjol',t:'Швея',sal:'45 000 – 80 000 сом',sched:'5/2',exp:'Обучим',area:'Кара-Жыгач',dist:'4,2 км',when:'Сегодня'},
+ {id:'j8',co:'shifa',t:'Медсестра',sal:'50 000 сом',sched:'2/2',exp:'от 1 года',area:'Ахунбаева',dist:'2,6 км',when:'Вчера'},
+ {id:'j1',co:'tash',t:'Официант',sal:'35 000 – 45 000 сом',sched:'2/2',exp:'от 1 года',area:'Тыналиева, 93',dist:'1,2 км',when:'Сегодня'},
+ {id:'j2',co:'nomad',t:'Бариста',sal:'40 000 – 55 000 сом',sched:'Сменный',exp:'Обучим',area:'ЦУМ',dist:'0,6 км',when:'Сегодня'},
+ {id:'j3',co:'orda',t:'Администратор ресепшн',sal:'60 000 сом',sched:'2/2',exp:'от 1 года',area:'Центр',dist:'2,0 км',when:'Вчера'},
+ {id:'j4',co:'alatoo',t:'Java-разработчик',sal:'150 000 – 250 000 сом',sched:'Гибрид',exp:'от 3 лет',area:'Ала-Тоо',dist:'3,1 км',when:'Вчера'},
+ {id:'j5',co:'tash',t:'Повар горячего цеха',sal:'70 000 сом',sched:'2/2',exp:'от 2 лет',area:'Тыналиева, 93',dist:'1,2 км',when:'2 дня назад'},
+ {id:'j6',co:'kok',t:'Кассир',sal:'35 000 сом',sched:'5/2',exp:'Без опыта',area:'Асанбай',dist:'1,8 км',when:'3 дня назад'}
+];
+const GIGS=[
+ {id:'g1',t:'Грузчики на переезд',d:'Сегодня',h:'15:00',pay:'1 500 сом',who:'Айгерим К.',r:4.9,dist:'0,8 км'},
+ {id:'g2',t:'Официант на банкет',d:'Сб',h:'18:00',pay:'2 000 сом',who:'Tash Kitchen',r:4.8,dist:'1,2 км'},
+ {id:'g3',t:'Собрать шкаф-купе',d:'Завтра',h:'10:00',pay:'800 сом',who:'Тимур А.',r:null,dist:'1,5 км'}
+];
+const REV={
+ tash:[{who:'Официант',len:'работал 8 мес.',r:5,t:'Чаевые делятся честно, график всегда заранее. Шеф строгий, но учит.'},{who:'Хостес',len:'работала 1 год',r:5,t:'Зарплата день в день, кормят хорошо. Выросла до старшего администратора.'},{who:'Бармен',len:'работал 3 мес.',r:4,t:'Хороший коллектив, но в выходные очень много гостей — нужно быть готовым.'},{who:'Помощник на кухню',len:'1 смена',r:2,t:'Обещали 1500 за смену, заплатили 1000.',disp:1}],
+ def:[{who:'Сотрудник',len:'работал 6 мес.',r:5,t:'Всё как в описании вакансии, оформили официально.'},{who:'Сотрудник',len:'работала 1 год',r:4,t:'Хорошие условия и обучение, иногда задерживают смены.'}]
+};
+const WRK={w1:{name:'Даниэл Базарбаев',L:'Д',c:'#2563EB',r:4.9,rc:21,done:23},w3:{name:'Нурик',L:'Н',c:'#7C3AED',r:null,rc:0,done:0},
+ w4:{name:'Айдай Тологонова',L:'А',c:'#DB2777',r:4.7,rc:9,done:12},w5:{name:'Бекзат Маратов',L:'Б',c:'#0E9F6E',r:4.8,rc:15,done:18}};
+/* Вакансии работодателя и кандидаты.
+   new — написал из приложения (WhatsApp/TG), offered — работодатель предложил работу, бот ждёт ответа,
+   hired — работник нажал «Принять» в боте, done — обе стороны подтвердили выполнение, declined — отказался */
+
+const STEPS=['Связались','Договорились','Выполнено','Отзыв'];
+let deals=[
+ {id:'d1',mode:'w',t:'Грузчики на переезд',other:'Айгерим К.',step:0,when:'Вчера · WhatsApp',pay:'1 500 сом'},
+ {id:'d2',mode:'w',t:'Собрать шкаф-купе',other:'Тимур А.',step:2,when:'Вчера',pay:'800 сом'},
+ {id:'d3',mode:'e',t:'Раздача листовок',other:'',step:0,when:'Сегодня, 12:00',pay:'250 сом/час',apps:[{w:'w1',via:'WhatsApp',at:'11:20'},{w:'w3',via:'Telegram',at:'09:05'}]},
+ {id:'d4',mode:'e',t:'Мойка окон в офисе',other:'Даниэл Базарбаев',step:2,when:'5 нояб.',pay:'1 200 сом'}
+];
+
+/* ---------- state / router ---------- */
+let stack=['home'],cur={},filter='all',kind='jobs',saved=new Set(['j4']),contacted=new Set(),follow=new Set(),dealMode='w',coTab='jobs',freeLeft=3;
+let points=1250,bank='mbank';const MIN=1000;
+const $=id=>document.getElementById(id);
+const fmtSom=n=>n.toFixed(2).replace('.',','),fmt=n=>n.toLocaleString('ru-RU');
+const R={home,companies,company,detail,deals:renderDeals,review,me,bonus,withdraw,newgig,bot,form};
+const NAVLESS=['company','detail','review','withdraw','newgig','cands','bot','form'];
+function go(s,p,root){if(root)stack=[s];else stack.push(s);if(p!==undefined&&p!==null)cur[s]=p;show(s)}
+function back(){if(stack.length>1)stack.pop();show(stack[stack.length-1])}
+function show(s){document.querySelectorAll('.screen').forEach(e=>e.classList.remove('active'));const el=$(s);el.classList.add('active');el.scrollTop=0;R[s]();
+  $('nav').classList.toggle('hide',NAVLESS.includes(s));document.querySelectorAll('.nav [data-s]').forEach(b=>b.classList.toggle('on',b.dataset.s===stack[0]));
+  show_badge()}
+function rerender(){R[stack[stack.length-1]]()}
+function toast(t){$('toast').textContent=t;$('toast').classList.add('on');clearTimeout(window._t);window._t=setTimeout(()=>$('toast').classList.remove('on'),2300)}
+function sheet(o){$('sheet').classList.toggle('on',!!o)}
+const coverBg=c=>`background:radial-gradient(120% 90% at 100% 0%,${c.c2},transparent 65%),radial-gradient(90% 70% at 0% 100%,rgba(0,0,0,.55),transparent),linear-gradient(140deg,${c.c1},${c.c2})`;
+const logo=(c,s=48,f=17)=>`<div class="logo" style="width:${s}px;height:${s}px;font-size:${f}px;background:linear-gradient(140deg,${c.c1},${c.c2})">${c.L}</div>`;
+const backBtn=(glass)=>`<button class="ibtn ${glass?'glass':''}" onclick="back()">${ic('back',20)}</button>`;
+function save(id,e){e&&e.stopPropagation();saved.has(id)?saved.delete(id):saved.add(id);toast(saved.has(id)?'Сохранено':'Убрано из сохранённых');rerender()}
+
+/* ---------- cards ---------- */
+const coCard=k=>{const c=CO[k];return `<div class="co-card" onclick="go('company','${k}')">
+  <div class="cover" style="${coverBg(c)}"><div class="grain"></div><div class="mono">${c.L}</div>${coverImg(c)}
+    <span class="xs" style="font-weight:600;opacity:.85;position:relative">${plur(JOBS.filter(j=>j.co===k).length,'вакансия','вакансии','вакансий')}</span>
+    <div class="tagline" style="position:relative">«${c.tag}»</div></div>
+  <div class="body">${logo(c,44,15)}<div style="flex:1;min-width:0"><div class="row" style="gap:6px"><h3>${c.name}</h3>${tick}</div><div class="xs muted" style="margin-top:2px">${c.type}</div></div>${star(c.r)}</div></div>`};
+const jobCard=j=>{const c=CO[j.co];return `<div class="job" onclick="go('detail','${j.id}')">
+  <div class="row" style="gap:14px;align-items:flex-start">${logo(c,48,16)}
+    <div style="flex:1;min-width:0"><div class="t">${j.t}</div><div class="co">${c.name} ${tick}</div></div>
+    <button class="heart ${saved.has(j.id)?'on':''}" onclick="save('${j.id}',event)">${ic(saved.has(j.id)?'heartf':'heart')}</button></div>
+  <div class="sal">${j.sal}</div>
+  <div class="meta">${j.sched} · ${j.exp} · ${j.dist}${contacted.has(j.id)?' · <span style="color:var(--ok);font-weight:600">вы связались</span>':''}</div></div>`};
+const gigRow=g=>`<div class="gig" onclick="toast('Задание: ${g.t}')"><div class="when">${g.h}<small>${g.d}</small></div>
+  <div style="flex:1;min-width:0"><h3>${g.t}</h3><div class="xs muted" style="margin-top:3px">${g.who} · ${g.dist}</div></div><b>${g.pay}</b></div>`;
+
+/* ---------- HOME ---------- */
+/* Сферы работодателей: в строке показываем первые, остальные — в «Ещё» */
+const CATS=[['all','Все'],['rest','Рестораны и кафе'],['cafe','Кофейни'],['hotel','Отели'],['sew','Швейные цеха'],['factory','Производство'],['market','Супермаркеты'],['it','IT-компании'],
+ ['fast','Фастфуд'],['retail','Магазины и ТЦ'],['bank','Банки и финансы'],['build','Стройка'],['log','Логистика и склады'],['delivery','Доставка'],['beauty','Салоны красоты'],
+ ['med','Клиники и аптеки'],['edu','Школы и курсы'],['kids','Детские сады'],['auto','Автосервисы'],['fit','Фитнес и спорт'],['call','Call-центры'],['event','Ивенты и банкеты'],['agro','Агро и фермы'],['clean','Клининг'],['sec','Охрана']];
+const CAT_ROW=8;
+function catChips(curv,fn){
+  const shown=CATS.slice(0,CAT_ROW),extra=CATS.find(c=>c[0]===curv&&CATS.indexOf(c)>=CAT_ROW);
+  return `<div class="chips">${shown.concat(extra?[extra]:[]).map(c=>`<button class="chip ${curv===c[0]?'on':''}" onclick="${fn}('${c[0]}')">${c[1]}</button>`).join('')}
+    <button class="chip" onclick="allCats('${fn}','${curv}')">Ещё ${CATS.length-CAT_ROW} ›</button></div>`}
+function allCats(fn,curv){
+  const n=k=>Object.values(CO).filter(c=>c.cat===k).length;
+  $('gsheetBody').innerHTML=`<div class="grab"></div><h2>Все сферы</h2><p class="s muted" style="margin-top:4px">Где хотите работать?</p>
+   <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px">${CATS.slice(1).map(c=>`<button onclick="$('gsheet').classList.remove('on');${fn}('${c[0]}')" class="row between" style="background:var(--card);border:1px solid ${curv===c[0]?'var(--ink)':'var(--line)'};border-radius:14px;padding:13px 12px;text-align:left;font-size:14px;font-weight:600">
+     <span>${c[1]}</span><span class="xs muted">${n(c[0])||''}</span></button>`).join('')}</div>
+   <button class="btn line block" style="margin-top:12px" onclick="$('gsheet').classList.remove('on');${fn}('all')">Показать все</button>`;
+  $('gsheet').classList.add('on');
+}
+function setHomeCat(k){filter=k;home()} function setCoCat(k){coFilter=k;companies()}
+function home(){
+  const jobs=JOBS.filter(j=>filter==='all'||CO[j.co].cat===filter);
+  $('home').innerHTML=`
+  <div class="hdr"><button class="me-ava" onclick="go('me',null,1)">F</button><div style="flex:1"><div class="xs muted">Добрый вечер</div><b>Focus</b></div>
+    <button class="ibtn" onclick="go('deals',null,1)">${ic('bell',20)}<span class="dot"></span></button></div>
+  <h1 style="margin-top:26px">Работа в лучших<br>местах Бишкека</h1>
+  <div class="searchbar" onclick="toast('Поиск')">${ic('search',20)}<span>Должность или компания</span></div>
+  <div class="tabs"><button class="${kind==='jobs'?'on':''}" onclick="kind='jobs';home()">Вакансии</button><button class="${kind==='gigs'?'on':''}" onclick="kind='gigs';home()">Подработка</button></div>
+  ${kind==='jobs'?`
+    ${catChips(filter,'setHomeCat')}
+    <div class="sec"><h2>Топ работодатели</h2><a onclick="go('companies',null,1)">Все</a></div>
+    <div class="hs">${Object.keys(CO).filter(k=>filter==='all'||CO[k].cat===filter).map(coCard).join('')}</div>
+    <div class="sec"><h2>Новые вакансии</h2><a>${jobs.length}</a></div>
+    ${jobs.map(jobCard).join('')||'<p class="muted">Пока нет вакансий в этой категории</p>'}`
+  :`<div class="sec"><h2>Сегодня и завтра</h2><a>рядом с вами</a></div>
+    <div class="panel" style="padding:4px 18px">${GIGS.map(gigRow).join('')}</div>
+    <button class="btn line block" style="margin-top:14px" onclick="openForm('gig')">${ic('plus',18)} Нужен человек на пару часов?</button>`}`;
+}
+
+/* ---------- COMPANIES ---------- */
+let coFilter='all';
+function companies(){
+  const ks=Object.keys(CO).filter(k=>coFilter==='all'||CO[k].cat===coFilter);
+  $('companies').innerHTML=`<h1>Компании</h1><p class="muted s" style="margin-top:6px">Проверенные работодатели с отзывами сотрудников</p>
+  <div class="searchbar">${ic('search',20)}<input placeholder="Название компании"></div>
+  ${catChips(coFilter,'setCoCat')}
+  <div style="margin-top:18px">${ks.map(k=>{const c=CO[k];return `<div class="job" onclick="go('company','${k}')" style="padding:0;overflow:hidden">
+    <div class="cover" style="height:84px;${coverBg(c)}"><div class="grain"></div><div class="mono" style="font-size:110px;bottom:-26px">${c.L}</div>${coverImg(c)}</div>
+    <div style="padding:0 18px 18px"><div style="margin-top:-26px;position:relative;border:3px solid #fff;border-radius:18px;width:max-content">${logo(c,50,17)}</div>
+      <div class="row between" style="margin-top:10px"><div class="row" style="gap:6px"><h3 style="font-size:18px">${c.name}</h3>${tick}</div>${star(c.r,c.rc)}</div>
+      <div class="s muted" style="margin-top:2px">${c.type}</div>
+      <div class="row s" style="margin-top:12px;gap:14px;color:var(--ink2)"><span>${plur(JOBS.filter(j=>j.co===k).length,"вакансия","вакансии","вакансий")}</span><span>Платит вовремя <b>${c.pay}%</b></span></div></div></div>`}).join('')}</div>`;
+}
+
+/* ---------- COMPANY PROFILE ---------- */
+function company(){
+  const k=cur.company,c=CO[k],jobs=JOBS.filter(j=>j.co===k),revs=REV[k]||REV.def;
+  $('company').innerHTML=`
+  <div class="cover hero" style="${coverBg(c)}"><div class="grain"></div><div class="mono" style="font-size:220px;bottom:-60px">${c.L}</div>${coverImg(c)}
+    ${backBtn(1)}<span class="row" style="gap:8px">${k===MY_CO?`<button class="ibtn glass" style="width:auto;padding:0 14px;border-radius:21px;font-size:13px;font-weight:600" onclick="pickPhoto('${k}','cover')">📷 Обложка</button>`:''}<button class="ibtn glass" onclick="toast('Ссылка скопирована')">${ic('share',18)}</button></span></div>
+  <div class="hero-logo" style="width:max-content">${logo(c,76,26)}</div>
+  ${k===MY_CO?`<div class="pad"><div class="xs" style="margin-top:10px;background:var(--brand-soft);color:var(--brand);border-radius:12px;padding:8px 12px;font-weight:600">Это ваша компания — добавьте фото зала, кухни и команды: с фото пишут в 2 раза чаще</div></div>`:''}
+  <div class="pad">
+    <div class="row" style="gap:8px;margin-top:12px"><h1 style="font-size:28px">${c.name}</h1>${tick}</div>
+    <div class="muted" style="margin-top:4px">${c.type} · Бишкек</div>
+    <div class="row" style="margin-top:10px;gap:12px">${star(c.r,c.rc+' отзыва')}<span class="xs" style="color:var(--ok);font-weight:600">● Платит вовремя ${c.pay}%</span></div>
+    <div class="xs muted" style="margin-top:6px">Подтверждает отметки сотрудников: <b style="color:var(--ink)">${c.conf||97}%</b></div>
+    <div class="stats"><div><b>${c.staff}</b><span>сотрудников</span></div><div><b>${c.hired}</b><span>наняли здесь</span></div><div><b>${c.since}</b><span>с Work KG</span></div></div>
+      <div class="strip">${c.img.slice(1).map((src,i)=>`<div class="tile" style="${coverBg({c1:c.c1,c2:i%2?'#3f3f46':c.c2})}"><img src="${src}" alt="" loading="lazy" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover" onerror="this.remove()">${c.place[i]?`<span style="position:relative;text-shadow:0 1px 4px rgba(0,0,0,.6)">${c.place[i]}</span>`:''}</div>`).join('')}
+        ${k===MY_CO?`<div class="tile add" onclick="pickPhoto('${k}','gallery')">${ic('plus',22)}<span>Добавить фото</span></div>`:''}</div>
+    <div class="row" style="margin-top:14px;gap:10px">
+      <button class="btn ${follow.has(k)?'line':'ink'} sm" style="flex:1" onclick="follow.has('${k}')?follow.delete('${k}'):follow.add('${k}');toast(follow.has('${k}')?'Сообщим о новых вакансиях':'Вы отписались');company()">${follow.has(k)?'✓ Вы подписаны':'Подписаться на вакансии'}</button></div>
+    <div class="tabs">${[['jobs',`Вакансии · ${jobs.length}`],['about','О компании'],['rev',`Отзывы · ${c.rc}`]].map(t=>`<button class="${coTab===t[0]?'on':''}" onclick="coTab='${t[0]}';company()">${t[1]}</button>`).join('')}</div>
+    <div style="margin-top:18px">
+    ${coTab==='jobs'?jobs.map(jobCard).join(''):''}
+    ${coTab==='about'?`<p class="prose">${c.about}</p>
+
+      <h3 style="margin-top:24px">Что даёт компания</h3><div class="perks">${c.perks.map(p=>`<span class="perk">${p}</span>`).join('')}</div>`:''}
+    ${coTab==='rev'?`<div class="panel"><div class="row between"><div><b style="font-size:34px;letter-spacing:-.03em">${c.r.toFixed(1)}</b><div class="xs muted">${c.rc} подтверждённых отзыва</div></div><div style="color:var(--star)">${ic('star',18).repeat(5)}</div></div>
+        ${[['Платит вовремя',4.9],['Условия как в вакансии',4.7],['Отношение к людям',4.8]].map(b=>`<div class="bar"><span class="t">${b[0]}</span><span class="b"><i style="width:${b[1]*20}%"></i></span><b>${b[1]}</b></div>`).join('')}</div>
+      <div style="margin-top:12px">${revs.map(r=>`<div class="rev"><div class="row between"><b>${r.who}</b><span style="color:var(--star)">${'★'.repeat(r.r)}<span style="color:#DDD">${'★'.repeat(5-r.r)}</span></span></div>
+        <div class="xs muted" style="margin-top:2px">${r.len}</div><p>${r.t}</p>${r.disp?`<div class="verified" style="color:#B45309">⚖️ Компания оспорила · связывался через Work KG</div>`:`<div class="verified">${ic('shield',14)} Работал(а) здесь — подтверждено</div>`}</div>`).join('')}</div>`:''}
+    </div>
+  </div>`;
+}
+
+/* ---------- JOB DETAIL ---------- */
+function detail(){
+  const j=JOBS.find(x=>x.id===cur.detail),c=CO[j.co],done=contacted.has(j.id);
+  $('detail').innerHTML=`
+  <div class="cover hero" style="height:190px;${coverBg(c)}"><div class="grain"></div><div class="mono" style="font-size:200px;bottom:-56px">${c.L}</div>${coverImg(c)}
+    ${backBtn(1)}<button class="ibtn glass" onclick="save('${j.id}')">${ic(saved.has(j.id)?'heartf':'heart',19)}</button></div>
+  <div class="hero-logo" style="width:max-content;cursor:pointer" onclick="go('company','${j.co}')">${logo(c,68,22)}</div>
+  <div class="pad" style="padding-bottom:140px">
+    <button class="row s" style="margin-top:12px;gap:6px;color:var(--ink2);font-weight:600" onclick="go('company','${j.co}')">${c.name} ${tick} ${ic('right',16)}</button>
+    <h1 style="margin-top:6px">${j.t}</h1>
+    <div style="font-size:22px;font-weight:700;margin-top:10px;letter-spacing:-.02em">${j.sal}<span class="s muted" style="font-weight:500"> / мес</span></div>
+    <div class="facts"><div class="fact"><span>График</span><b>${j.sched}</b></div><div class="fact"><span>Опыт</span><b>${j.exp}</b></div><div class="fact"><span>Где</span><b>${j.dist}</b></div></div>
+    <h3 style="margin-top:28px">Что вы получите</h3><div class="perks">${c.perks.map(p=>`<span class="perk">${p}</span>`).join('')}</div>
+    <h3 style="margin-top:28px">О работе</h3>
+    <div class="prose" style="margin-top:8px">Встречать гостей, помогать с выбором и делать так, чтобы им захотелось вернуться.
+      <ul><li>Обслуживание 5–6 столов в смену</li><li>Работа в iiko, обучение — 3 дня</li><li>Смена 11:00–23:00</li></ul></div>
+    <div class="row s muted" style="margin-top:14px;gap:6px">${ic('pin',16)} ${j.area} · <a style="color:var(--ok);font-weight:600" onclick="toast('Открываем 2GIS')">маршрут в 2GIS</a></div>
+    <div class="panel" style="margin-top:24px;cursor:pointer" onclick="go('company','${j.co}')">
+      <div class="row" style="gap:12px">${logo(c,46,15)}<div style="flex:1"><div class="row" style="gap:6px"><h3>${c.name}</h3>${tick}</div><div class="xs muted">${c.rc} отзывов сотрудников</div></div>${ic('right',18)}</div>
+      <div class="row" style="margin-top:14px;gap:16px">${star(c.r)}<span class="s" style="color:var(--ok);font-weight:600">Платит вовремя ${c.pay}%</span></div>
+      <p class="s muted" style="margin-top:10px;font-style:italic">«${(REV[j.co]||REV.def)[0].t}»</p></div>
+    <p class="note" style="text-align:left;margin-top:18px"><a onclick="toast('Жалоба отправлена')" style="text-decoration:underline;cursor:pointer">Пожаловаться</a> · опубликовано ${j.when.toLowerCase()}</p>
+  </div>
+  <div class="cta"><div class="row" style="gap:10px"><button class="btn wa" onclick="contact('${j.id}','WhatsApp')">WhatsApp</button><button class="btn tg" onclick="contact('${j.id}','Telegram')">Telegram</button></div>
+    <div class="note">${done?'✓ Вы связались — через пару дней бот спросит, работали ли вы вместе':`Бесплатно сегодня: ${freeLeft} из 3 контактов`}</div></div>`;
+}
+function contact(id,via){
+  const j=JOBS.find(x=>x.id===id);
+  if(!contacted.has(id)){if(!freeLeft){toast('Лимит на сегодня исчерпан — откройте PRO');return}freeLeft--;contacted.add(id);
+    asks.push({id:'n'+Date.now(),other:CO[j.co].name,co:j.co,t:j.t,when:'Связались сегодня · бот спросит через 3 дня'});}
+  detail();toast(`Открываем ${via}: «Здравствуйте! Пишу по вакансии «${j.t}» из Work KG»`);
+}
+
+/* ---------- DEALS: один вопрос вместо статусов ---------- */
+/* Логика:
+   1) контакт (клик WhatsApp/TG) фиксируется автоматически;
+   2) в нужный момент бот задаёт ОДИН вопрос «Работали вместе?» со звёздами — оценка = подтверждение;
+   3) достаточно ответа одной стороны: второй получает «Всё верно?», молчание 48 ч = подтверждено;
+   4) работодатель закрывает вакансию через «Кого наняли?» (иначе она сама истекает). */
+let asks=[
+ {id:'a1',other:'Tash Kitchen',co:'tash',t:'Официант на банкет',when:'Смена прошла в субботу'},
+ {id:'a2',other:'Айгерим К.',t:'Грузчики на переезд',when:'Вчера, 15:00'}
+];
+let confirms=[{id:'c1',other:'Nomad Coffee',co:'nomad',t:'Бариста',left:'31 ч'}];
+let doneList=[{other:'Orda Hotel',t:'Помощник на банкет',r:2,when:'сен.',lvl:'disputed'},{other:'Тимур А.',t:'Собрать шкаф-купе',r:5,when:'3 нояб.',lvl:'ok'},{other:'Kök Market',t:'Кассир',r:4,when:'окт.',lvl:'contact'}];
+let empConfirms=[{id:'e1',w:'w1',t:'Мойка окон в офисе',left:'40 ч'}];
+let MYV=[
+ {id:'mv1',t:'Официант на банкет',when:'Сб, 18:00',exp:'Истекает завтра',wrote:['w1','w3','w4','w5'],hired:[],closed:false},
+ {id:'mv2',t:'Повар горячего цеха',when:'Постоянная · 2/2',exp:'Ещё 12 дней',wrote:['w5'],hired:[],closed:false}
+];
+const verifiedCount=()=>doneList.filter(d=>d.lvl==='ok').length;
+const pending=()=>asks.length+confirms.length+empConfirms.length;
+const starRow=(fn)=>`<div class="stars" style="gap:6px">${[1,2,3,4,5].map(n=>`<button onclick="${fn}(${n})" aria-label="${n}">${ic('star',22)}</button>`).join('')}</div>`;
+const ava=(w,s=40)=>`<div class="logo" style="width:${s}px;height:${s}px;background:${w.c};border-radius:${s/3}px;font-size:${s/2.8}px">${w.L}</div>`;
+
+function renderDeals(){
+  const W=dealMode==='w';
+  $('deals').innerHTML=`<h1>Сделки</h1><p class="muted s" style="margin-top:6px">Один вопрос — и работа засчитана</p>
+  <div class="tabs"><button class="${W?'on':''}" onclick="dealMode='w';renderDeals()">Я исполнитель</button><button class="${!W?'on':''}" onclick="dealMode='e';renderDeals()">Я работодатель</button></div>
+  ${W?workerView():employerView()}
+  <button class="panel row" style="width:100%;margin-top:22px;gap:12px;text-align:left" onclick="botRole='${dealMode}';go('bot')"><span class="logo" style="width:40px;height:40px;background:#229ED9;border-radius:50%">${ic('bell',18)}</span><span style="flex:1"><b class="s">Те же вопросы приходят в бот</b><span class="xs muted" style="display:block">Посмотреть, как это выглядит в Telegram</span></span>${ic('right',18)}</button>`;
+  show_badge();
+}
+function workerView(){
+  const v=verifiedCount(),need=3;
+  return `<div class="balance" style="margin-top:18px;padding:18px">
+    <div class="row between"><b>${v>=need?'✓ Проверенный работник':'Бейдж «Проверенный работник»'}</b><span class="xs" style="opacity:.8">${Math.min(v,need)} / ${need}</span></div>
+    <div style="height:6px;background:rgba(255,255,255,.2);border-radius:6px;margin-top:12px;overflow:hidden"><div style="height:100%;width:${Math.min(100,v/need*100)}%;background:#fff;border-radius:6px"></div></div>
+    <div class="xs" style="opacity:.8;margin-top:10px">${v>=need?'Вы выше в поиске, работодатели видят бейдж':'Ещё '+(need-v)+' подтверждённые работы — и вы выше в поиске'} · +30 баллов за каждый ответ</div></div>
+  ${asks.length?`<div class="sec"><h2>Ответьте на ${asks.length===1?'вопрос':asks.length+' вопроса'}</h2></div>
+    ${asks.map(a=>`<div class="panel" style="margin-bottom:12px">
+      <div class="s">Вы работали с <b>${a.other}</b>${a.co?' '+tick:''}?</div><div class="xs muted" style="margin-top:3px">${a.t} · ${a.when}</div>
+      <div class="xs" style="margin-top:12px;font-weight:600">Поставьте оценку — это и есть «да»</div>${starRow(`(n=>answer('${a.id}',n))`)}
+      <button class="xs muted" style="margin-top:12px;text-decoration:underline" onclick="noWork('${a.id}')">Нет, не работали</button></div>`).join('')}`:''}
+  ${confirms.length?`<div class="sec"><h2>Подтвердите</h2></div>
+    ${confirms.map(c=>`<div class="panel" style="margin-bottom:12px"><div class="s"><b>${c.other}</b> ${tick} отметил(а), что вы у них работали</div><div class="xs muted" style="margin-top:3px">${c.t}</div>
+      <div class="row" style="margin-top:12px"><button class="btn line sm" style="flex:1" onclick="objection('${c.id}')">Не работал</button><button class="btn ink sm" style="flex:1" onclick="confirmIt('${c.id}')">Да, верно</button></div>
+      <div class="xs muted" style="margin-top:8px">Если не ответите — засчитаем автоматически через ${c.left}</div></div>`).join('')}`:''}
+  ${!asks.length&&!confirms.length?`<div class="panel" style="margin-top:18px;text-align:center"><b>Всё отвечено ✓</b><div class="xs muted" style="margin-top:4px">Новые вопросы бот пришлёт сам</div></div>`:''}
+  <div class="sec"><h2>Мои работы</h2><a>${doneList.length}</a></div>
+  <div class="panel" style="padding:4px 18px">${doneList.map((d,i)=>{const L={ok:['✓ Подтверждено','var(--ok)'],contact:['💬 Связывались через Work KG','var(--muted)'],disputed:['⚖️ Компания оспорила — отзыв виден с пометкой','#B45309'],review:['⏳ Доказательство на проверке','var(--gig)']}[d.lvl];
+    return `<div class="gig" style="cursor:default"><div style="flex:1"><h3>${d.t}</h3><div class="xs muted" style="margin-top:3px">${d.other} · ${d.when}</div>
+    <div class="xs" style="margin-top:6px;font-weight:600;color:${L[1]}">${L[0]}</div>${d.lvl==='disputed'?`<button class="btn line sm" style="margin-top:8px;height:34px;font-size:13px" onclick="proofSheet(${i})">Добавить доказательство</button>`:''}</div><span style="color:var(--star)">${'★'.repeat(d.r)}</span></div>`}).join('')}</div>`;
+}
+function answer(id,n){const a=asks.find(x=>x.id===id);asks=asks.filter(x=>x.id!==id);doneList.unshift({other:a.other,t:a.t,r:n,when:'сегодня',lvl:'ok'});points+=30;
+  renderDeals();toast(`+30 баллов · ${a.other} получит «Всё верно?»`)}
+function noWork(id){asks=asks.filter(x=>x.id!==id);renderDeals();toast('Понятно, больше не спросим')}
+function confirmIt(id){const c=confirms.find(x=>x.id===id);confirms=confirms.filter(x=>x.id!==id);doneList.unshift({other:c.other,t:c.t,r:5,when:'сегодня',lvl:'ok'});points+=30;renderDeals();toast('+30 баллов · работа подтверждена')}
+function objection(id){confirms=confirms.filter(x=>x.id!==id);renderDeals();toast('Отметка снята, модератор проверит')}
+
+function employerView(){
+  return `${empConfirms.map(c=>{const w=WRK[c.w];return `<div class="panel" style="margin-top:18px">
+      <div class="row" style="gap:12px">${ava(w)}<div class="s" style="flex:1"><b>${w.name}</b> отметил, что работал у вас<div class="xs muted" style="margin-top:2px">${c.t}</div></div></div>
+      <div class="xs" style="margin-top:12px;font-weight:600">Оцените — это подтвердит работу</div><div class="xs muted" style="margin-top:2px">Его оценку вы увидите только после своего ответа</div>${starRow(`(n=>empAnswer('${c.id}',n))`)}
+      <div class="row between" style="margin-top:10px"><button class="xs muted" style="text-decoration:underline" onclick="empNo('${c.id}')">Он у нас не работал</button><span class="xs muted">авто через ${c.left}</span></div></div>`}).join('')}
+  <div class="sec"><h2>Мои вакансии</h2></div>
+  ${MYV.map(v=>`<div class="panel" style="margin-bottom:12px">
+    <div class="row between"><h3 style="font-size:17px">${v.t}</h3><span class="status ${v.closed?'st3':'st0'}">${v.closed?'Закрыта':v.exp}</span></div>
+    <div class="xs muted" style="margin-top:2px">${v.when}</div>
+    ${v.closed?`<div class="verified" style="margin-top:12px">${ic('check',14)} ${v.hired.length?'Наняли: '+v.hired.map(h=>WRK[h].name.split(' ')[0]).join(', '):'Закрыта без найма через Work KG'}</div>`
+    :`<div class="row" style="margin-top:14px;gap:10px"><div style="display:flex">${v.wrote.map((w,i)=>`<div style="margin-left:${i?-10:0}px;border:2px solid #fff;border-radius:14px">${ava(WRK[w],34)}</div>`).join('')}</div>
+      <span class="s muted">написали ${v.wrote.length}</span></div>
+      <button class="btn ink sm block" style="margin-top:14px" onclick="hireSheet('${v.id}')">Закрыть набор</button>`}</div>`).join('')}
+  <p class="xs muted" style="line-height:1.5;margin-top:4px">Каждый отмеченный найм добавляется в «Наняли через Work KG» на профиле компании. Без отметки вакансия сама истечёт, а перевыложить её бесплатно можно после вопроса «Кого наняли?».</p>`;
+}
+function empAnswer(id,n){empConfirms=empConfirms.filter(x=>x.id!==id);renderDeals();toast('Спасибо! Работа подтверждена ✓')}
+
+
+/* «Кого наняли?» */
+let hireSel=new Set(),hireV=null;
+function hireSheet(id){hireV=MYV.find(x=>x.id===id);hireSel=new Set();drawHire();$('gsheet').classList.add('on')}
+function drawHire(){
+  const v=hireV;
+  $('gsheetBody').innerHTML=`<div class="grab"></div><h2>Кого наняли?</h2><p class="s muted" style="margin-top:4px">Эти люди писали вам по «${v.t}» через Work KG</p>
+  <div style="margin-top:14px">${v.wrote.map(w=>{const x=WRK[w],on=hireSel.has(w);return `<button class="opt" style="width:100%;text-align:left;border:2px solid ${on?'var(--ink)':'transparent'}" onclick="hireSel.has('${w}')?hireSel.delete('${w}'):hireSel.add('${w}');drawHire()">
+    ${ava(x,44)}<div style="flex:1"><b>${x.name}</b><span>${x.r?'★ '+x.r.toFixed(1)+' · ':''}${x.done} работ</span></div>
+    <span style="width:26px;height:26px;border-radius:8px;display:grid;place-items:center;background:${on?'var(--ink)':'#F1F0EC'};color:#fff">${on?ic('check',16,3):''}</span></button>`}).join('')}</div>
+  <button class="btn red block" style="margin-top:16px;${hireSel.size?'':'opacity:.4'}" onclick="hireSel.size&&closeV()">Наняли ${hireSel.size||''} — закрыть набор</button>
+  <div class="row" style="margin-top:8px"><button class="btn line sm" style="flex:1" onclick="closeV()">Никого</button><button class="btn line sm" style="flex:1" onclick="closeV()">Не через Work KG</button></div>`;
+}
+function closeV(){const v=hireV;v.closed=true;v.hired=[...hireSel];CO.tash.hired+=v.hired.length;$('gsheet').classList.remove('on');renderDeals();
+  toast(v.hired.length?`Бот спросит ${v.hired.length===1?'работника':'работников'} «Всё верно?» · +${v.hired.length} к «Наняли» на профиле`:'Вакансия закрыта')}
+
+/* «Я нашёл работу» (в профиле) */
+let jobStatus='search';
+function foundSheet(){
+  const places=[...new Set([...contacted].map(id=>CO[JOBS.find(j=>j.id===id).co].name).concat(['Tash Kitchen','Nomad Coffee']))].slice(0,3);
+  $('gsheetBody').innerHTML=`<div class="grab"></div><h2>Поздравляем! Где теперь работаете?</h2><p class="s muted" style="margin-top:4px">Вы писали этим работодателям через Work KG</p>
+  ${places.map(p=>`<button class="opt" style="width:100%;text-align:left" onclick="found('${p}')"><div class="ic" style="background:#F1F0EC">${ic('building',20)}</div><div style="flex:1"><b>${p}</b></div>${ic('right',18)}</button>`).join('')}
+  <button class="btn line block" style="margin-top:12px" onclick="found('')">В другом месте</button>`;
+  $('gsheet').classList.add('on');
+}
+function found(p){jobStatus=p||'other';$('gsheet').classList.remove('on');if(p){doneList.unshift({other:p,t:'Постоянная работа',r:5,when:'сегодня',lvl:'ok'});points+=30}
+  me();toast(p?`+30 баллов · ${p} получит «Всё верно?»`:'Статус обновлён — вакансии больше не показываем')}
+
+function show_badge(){$('dealBadge').textContent=pending();$('dealBadge').style.display=pending()?'grid':'none'}
+
+/* ---------- BOT (как выглядит в Telegram) ---------- */
+let bs=0,botRole='w',botSel=new Set();
+function bot(){bs=0;botSel=new Set();botDraw()}
+function botDraw(){
+  const msg=(html,rows)=>`<div style="max-width:88%;margin-top:10px"><div style="background:#fff;border-radius:16px 16px 16px 4px;padding:10px 12px;font-size:14.5px;line-height:1.45;box-shadow:0 1px 1px rgba(0,0,0,.08)">${html}</div>
+    ${rows?rows.map(r=>`<div style="display:grid;grid-template-columns:repeat(${r.length},1fr);gap:4px;margin-top:4px">${r.map(k=>`<button onclick="${k[1]}" style="background:rgba(0,0,0,.28);color:#fff;border-radius:10px;padding:9px 4px;font-size:13.5px;font-weight:600">${k[0]}</button>`).join('')}</div>`).join(''):''}</div>`;
+  const me=t=>`<div style="display:flex;justify-content:flex-end;margin-top:10px"><div style="background:#E1FEC6;border-radius:16px 16px 4px 16px;padding:8px 12px;font-size:14.5px">${t}</div></div>`;
+  const day=t=>`<div style="text-align:center;margin-top:14px"><span style="background:rgba(0,0,0,.25);color:#fff;font-size:12px;padding:3px 10px;border-radius:10px">${t}</span></div>`;
+  const stars=a=>[[1,2,3,4,5].map(n=>['⭐'+n,`${a}=${n};botDraw()`])];
+  let h='';
+  if(botRole==='w'){
+    h=day('Сб, 23:30')+msg(`Вы работали с <b>Tash Kitchen</b> ${tick}?<br>🍽 Официант на банкет · Сб, 18:00<br><br>Поставьте оценку — это и есть «да» 👇`,
+      bs===0?stars('bs').concat([[['Нет, не работали',"toast('Больше не спросим')"]]]):null);
+    if(bs)h+=me('⭐ '+bs)+msg(`Засчитано ✅ <b>+30 баллов</b><br>До бейджа «Проверенный работник» осталась 1 работа.<br><br>Добавите пару слов?`,[[['✍️ Написать',"openReview('Официант на банкет','Tash Kitchen','w')"],['Не нужно','back()']]]);
+  }else{
+    h=day('Сегодня, 10:00')+msg(`<b>Даниэл Базарбаев</b> отметил, что работал у вас<br>🧹 Мойка окон в офисе · 5 нояб.<br><br>Оцените — это подтвердит работу.<br><i style="color:#8A8A93">Его оценку вы увидите после ответа. Не ответите за 48 ч — засчитаем автоматически.</i>`,
+      bs===0?stars('bs').concat([[['Он у нас не работал',"toast('Отзыв останется с пометкой «Компания оспорила»')"]]]):null);
+    if(bs){h+=me('⭐ '+bs)+msg('Спасибо, работа подтверждена ✅');
+      const names=[['w1','Даниэл Б.'],['w3','Нурик'],['w4','Айдай Т.'],['w5','Бекзат М.']];
+      h+=day('Сегодня, 18:00')+msg(`Вакансия <b>«Официант на банкет»</b> истекает завтра.<br>Кого вы наняли? Вам писали:`,
+        botSel.has('done')?null:[names.slice(0,2).map(n=>[(botSel.has(n[0])?'✅ ':'')+n[1],`botSel.has('${n[0]}')?botSel.delete('${n[0]}'):botSel.add('${n[0]}');botDraw()`]),
+          names.slice(2).map(n=>[(botSel.has(n[0])?'✅ ':'')+n[1],`botSel.has('${n[0]}')?botSel.delete('${n[0]}'):botSel.add('${n[0]}');botDraw()`]),
+          [['Никого',"botSel=new Set(['done']);botDraw()"],['Не через Work KG',"botSel=new Set(['done']);botDraw()"]],[['Готово ✓',"botSel.add('done');botDraw()"]]]);
+      if(botSel.has('done')){const n=[...botSel].filter(x=>x!=='done').length;
+        h+=me(n?'Готово ✓':'Никого')+msg(n?`Вакансия закрыта. Наняли: ${n} чел.<br>На профиле Tash Kitchen теперь <b>«Наняли через Work KG: ${46+n}»</b> 🎉<br><br>Перевыложить вакансию бесплатно?`:'Вакансия закрыта. Перевыложить бесплатно?',[[['🔁 Перевыложить',"toast('Вакансия снова в поиске')"],['Не нужно','back()']]])}
+    }
+  }
+  $('bot').innerHTML=`<div style="position:absolute;inset:0;overflow-y:auto;background:linear-gradient(160deg,#A7C4A0,#C9D9A8 50%,#9FC0B8);padding-bottom:30px" id="botScroll">
+    <div style="position:sticky;top:0;z-index:2;background:#fff;padding:14px 16px 10px;box-shadow:0 1px 0 rgba(0,0,0,.08)">
+      <div style="display:flex;align-items:center;gap:12px"><button onclick="back()" style="color:#229ED9">${ic('back',22)}</button>
+      <div class="logo" style="width:40px;height:40px;border-radius:50%;background:linear-gradient(140deg,#0E0E10,#B4161B);font-size:13px">KG</div>
+      <div><b>Work KG</b><div class="xs" style="color:#8A8A93">бот</div></div></div>
+      <div class="tabs" style="margin-top:10px;border:0">${[['w','Видит работник'],['e','Видит работодатель']].map(r=>`<button class="${botRole===r[0]?'on':''}" onclick="botRole='${r[0]}';bot()">${r[1]}</button>`).join('')}</div></div>
+    <div style="padding:0 12px">${h}</div>
+    <p style="text-align:center;font-size:12px;color:rgba(0,0,0,.45);margin-top:20px;padding:0 30px">Макет переписки с ботом в Telegram. Кнопки нажимаются.</p></div>`;
+  setTimeout(()=>{const s=$('botScroll');if(s)s.scrollTop=s.scrollHeight},30);
+}
+function openReview(t,other,mode){const id='r'+Date.now();deals.push({id,t,other,mode,pay:'',step:2});go('review',id)}
+
+/* ---------- Каталог профессий: поиск + сферы + своя профессия ---------- */
+const PROF={
+ 'IT':['Java-разработчик','Frontend-разработчик','Python-разработчик','Мобильный разработчик','QA-тестировщик','UI/UX-дизайнер','DevOps-инженер','Аналитик данных','Project-менеджер','Техподдержка','1С-программист'],
+ 'Общепит':['Официант','Бариста','Повар','Помощник повара','Бармен','Хостес','Посудомойщик','Пекарь','Кондитер'],
+ 'Дом и семья':['Няня','Сиделка','Домработница','Гувернантка','Повар на дом','Садовник'],
+ 'Образование':['Репетитор','Учитель английского','Воспитатель','Фитнес-тренер'],
+ 'Производство и цеха':['Швея','Закройщик','Технолог швейного производства','Оператор станка','Упаковщик','Контролёр ОТК','Мастер цеха','Рабочий на производство'],
+ 'Торговля':['Продавец-консультант','Кассир','Мерчендайзер','Товаровед','Торговый агент'],
+ 'Офис':['Администратор','Бухгалтер','Менеджер по продажам','Оператор call-центра','HR-менеджер','Секретарь','Юрист'],
+ 'Маркетинг и медиа':['SMM-специалист','Таргетолог','Копирайтер','Фотограф','Видеомонтажёр','Мобилограф'],
+ 'Красота':['Парикмахер','Мастер маникюра','Косметолог','Массажист','Визажист'],
+ 'Стройка и ремонт':['Разнорабочий','Электрик','Сантехник','Сварщик','Маляр','Плиточник','Сборщик мебели'],
+ 'Транспорт и склад':['Курьер','Водитель','Водитель такси','Грузчик','Кладовщик','Экспедитор'],
+ 'Медицина':['Медсестра','Фармацевт','Врач','Ветеринар'],
+ 'Отели':['Администратор ресепшн','Горничная','Портье'],
+ 'Клининг и охрана':['Уборщица','Клинер','Охранник']
+};
+const KW={'Java-разработчик':'java джава программист айти it backend бэкенд spring','Frontend-разработчик':'фронтенд react js javascript программист айти it веб','Python-разработчик':'питон программист айти it django','Мобильный разработчик':'android ios flutter программист айти it','QA-тестировщик':'тестировщик qa айти it','UI/UX-дизайнер':'дизайнер figma айти it веб','DevOps-инженер':'девопс kubernetes айти it','Аналитик данных':'sql аналитик айти it','1С-программист':'1с программист айти',
+ 'Няня':'ребенок дети бала багуучу','Сиделка':'уход пожилые больные','Репетитор':'учитель уроки математика','Курьер':'доставка яндекс глово','Водитель':'шофер машина','Грузчик':'переезд','Уборщица':'клининг уборка тазалык','Продавец-консультант':'продажи магазин сатуучу','Официант':'кафе ресторан','Повар':'кухня ашпозчу','Бухгалтер':'1с учет','Швея':'шитье швейный цех тигуучу','Упаковщик':'упаковка цех'};
+const PALL=Object.entries(PROF).flatMap(([c,a])=>a.map(n=>({n,c,kw:(n+' '+c+' '+(KW[n]||'')).toLowerCase()})));
+const POPULAR=['Официант','Java-разработчик','Няня','Курьер','Продавец-консультант','Репетитор','SMM-специалист','Водитель','Бариста','Сиделка'];
+const catOf=n=>(PALL.find(p=>p.n===n)||{}).c;
+let PS={};
+const fieldOf=k=>FORMS[cur.form].fields.find(f=>f.k===k);
+const profSel=k=>{const v=fv[k];return Array.isArray(v)?v:v?[v]:[]};
+function profSug(k){
+  const st=PS[k]||(PS[k]={q:'',cat:null}),q=st.q.trim().toLowerCase(),sel=profSel(k);
+  if(fieldOf(k).single&&sel.length&&!q)return '';
+  const btn=n=>{const on=sel.includes(n);return `<button class="chip ${on?'on':''}" onclick="profAdd('${k}','${n.replace(/'/g,"\\'")}')">${on?'✓ ':''}${n}</button>`};
+  if(q){
+    const words=q.split(/\s+/),res=PALL.filter(p=>words.every(w=>p.kw.includes(w))).slice(0,10);
+    const exact=PALL.some(p=>p.n.toLowerCase()===q);
+    return `<div class="row" style="flex-wrap:wrap;gap:8px;margin-top:10px">${res.map(p=>btn(p.n)).join('')}
+      ${!exact?`<button class="chip" style="border-style:dashed" onclick="profAdd('${k}',PS['${k}'].q.trim())">＋ Добавить «${st.q.trim()}»</button>`:''}</div>
+      ${!res.length?`<div class="xs muted" style="margin-top:8px">Такой профессии нет в списке — добавьте свою, работодатели найдут её через поиск</div>`:''}`;
+  }
+  if(st.cat)return `<button class="xs" style="margin-top:12px;font-weight:600;color:var(--muted)" onclick="PS['${k}'].cat=null;profRefresh('${k}')">← Все сферы</button>
+    <div class="s" style="font-weight:700;margin-top:6px">${st.cat}</div><div class="row" style="flex-wrap:wrap;gap:8px;margin-top:8px">${PROF[st.cat].map(btn).join('')}</div>`;
+  return `<div class="xs muted" style="margin-top:12px;font-weight:600">Популярное</div>
+    <div class="row" style="flex-wrap:wrap;gap:8px;margin-top:8px">${POPULAR.map(btn).join('')}</div>
+    <div class="xs muted" style="margin-top:16px;font-weight:600">Все сферы</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">${Object.keys(PROF).map(c=>{const n=PROF[c].filter(x=>sel.includes(x)).length;
+      return `<button onclick="PS['${k}'].cat='${c}';profRefresh('${k}')" class="row between" style="background:var(--card);border:1px solid ${n?'var(--ink)':'var(--line)'};border-radius:14px;padding:12px;text-align:left;font-size:14px;font-weight:600">
+        <span>${c}</span><span class="xs" style="color:${n?'var(--ink)':'var(--muted)'}">${n?'✓ '+n:PROF[c].length}</span></button>`}).join('')}</div>`;
+}
+function profTags(k){const f=fieldOf(k),sel=profSel(k);if(!sel.length)return '';
+  return `<div class="row" style="flex-wrap:wrap;gap:8px;margin-bottom:10px">${sel.map(n=>`<span class="chip on" style="display:inline-flex;align-items:center;gap:6px;cursor:default">${n}<button style="color:#fff;opacity:.7;font-size:16px;line-height:1" onclick="profAdd('${k}','${n.replace(/'/g,"\\'")}')">×</button></span>`).join('')}
+    ${f.max&&!f.single?`<span class="xs muted" style="align-self:center">${sel.length} из ${f.max}</span>`:''}</div>`}
+function profRefresh(k){$('tags_'+k).innerHTML=profTags(k);$('sug_'+k).innerHTML=profSug(k)}
+function profQ(k,v){(PS[k]||(PS[k]={q:'',cat:null})).q=v;$('sug_'+k).innerHTML=profSug(k)}
+function profAdd(k,n){
+  if(!n)return;const f=fieldOf(k);n=n.charAt(0).toUpperCase()+n.slice(1);
+  if(f.single){fv[k]=fv[k]===n?'':n;
+    if(cur.form==='vac'&&fv[k]){const c=catOf(n),opts=fieldOf('cat').opts,i=opts.indexOf(c);fv.cat=i>=0?i:opts.length-1;const el=$('form').scrollTop;PS[k]={q:'',cat:null};form();$('form').scrollTop=el;toast(c?'Сфера определена: '+c:'Своя должность добавлена');return}}
+  else{const a=profSel(k);if(a.includes(n))fv[k]=a.filter(x=>x!==n);else{if(f.max&&a.length>=f.max){toast('Можно выбрать до '+f.max);return}fv[k]=a.concat(n)}}
+  PS[k]={q:'',cat:PS[k]&&!PS[k].q?PS[k].cat:null};const inp=$('in_'+k);if(inp)inp.value='';profRefresh(k);
+  if(fErr[k]){delete fErr[k];const fe=$('in_'+k).closest('.field');fe.classList.remove('err');const h=fe.querySelector('.hint');if(h)h.remove()}
+}
+const profField=f=>`<div id="tags_${f.k}">${profTags(f.k)}</div>
+  <div class="row" style="gap:10px;background:var(--card);border:1px solid var(--line);border-radius:16px;height:54px;padding:0 14px;color:var(--muted)">${ic('search',20)}
+    <input id="in_${f.k}" style="border:0;outline:0;padding:0;flex:1;font-size:16px;background:none" placeholder="${f.ph||'Например: няня, java, бариста'}" value="${(PS[f.k]||{}).q||''}" oninput="profQ('${f.k}',this.value)"></div>
+  <div id="sug_${f.k}">${profSug(f.k)}</div>`;
+
+/* ---------- FORMS: вакансия / резюме / услуги / задание ---------- */
+const FORMS={
+ vac:{title:'Новая вакансия',sub:'Вакансии с зарплатой и понятным описанием получают в 3 раза больше откликов.',btn:'Опубликовать вакансию',fields:[
+  {k:'t',type:'prof',single:1,label:'Должность',ph:'Найдите или впишите: бариста, java…',min:3,err:'Выберите или впишите должность',hint:'Сферу определим сами'},
+  {k:'co',type:'static',label:'Компания',val:'Tash Kitchen'},
+  {k:'cat',type:'chips',label:'Сфера',opts:Object.keys(PROF).concat('Другое'),req:1},
+  {k:'sal',type:'range',label:'Зарплата, сом',hint:'Можно указать только «от»'},
+  {k:'per',type:'seg',opts:['В месяц','За смену','В час']},
+  {k:'neg',type:'toggle',label:'Договорная',hint:'Без суммы откликаются реже'},
+  {k:'sch',type:'chips',label:'График',opts:['5/2','2/2','6/1','Сменный','Гибкий','Удалённо'],multi:1,req:1},
+  {k:'exp',type:'chips',label:'Опыт',opts:['Без опыта','от 1 года','от 3 лет'],req:1},
+  {k:'addr',type:'text',label:'Адрес',ph:'Улица, дом — подсказки 2GIS',min:3,err:'Укажите адрес'},
+  {k:'perks',type:'chips',label:'Что вы даёте',opts:['🍽 Питание','👔 Форма','💸 Чаевые','🎓 Обучение','🚐 Развозка','📄 Официально'],multi:1},
+  {k:'desc',type:'textarea',label:'Описание',ph:'Чем предстоит заниматься?\nКого ищете?\nКакие условия?',min:40,err:'Минимум 40 символов — расскажите о работе подробнее'}]},
+ res:{title:'Резюме за 60 секунд',sub:'Работодатели увидят его в разделе «Исполнители» и смогут написать вам.',btn:'Сохранить резюме',fields:[
+  {k:'want',type:'prof',label:'Кем хотите работать',max:5,req:1,hint:'Можно несколько, даже из разных сфер — например «Няня» и «Java-разработчик»'},
+  {k:'exp',type:'chips',label:'Опыт',opts:['Нет опыта','До 1 года','1–3 года','Больше 3 лет'],req:1},
+  {k:'sal',type:'text',label:'Желаемая зарплата, от',ph:'40 000',num:1},
+  {k:'sch',type:'chips',label:'Удобный график',opts:['5/2','2/2','Сменный','Только выходные','Удалённо'],multi:1},
+  {k:'area',type:'text',label:'Район',ph:'Например: Асанбай, Джал'},
+  {k:'about',type:'textarea',label:'Пара слов о себе',ph:'Где работали, что умеете, чем гордитесь',min:20,err:'Минимум 20 символов'},
+  {k:'photo',type:'photo',label:'Фото',hint:'С фото откликаются в 2 раза чаще'}]},
+ svc:{title:'Мои услуги',sub:'Для подработки: вас найдут те, кому нужен человек сегодня.',btn:'Опубликовать услуги',fields:[
+  {k:'skills',type:'prof',label:'Что умеете',max:8,req:1,ph:'Например: няня, сантехник, репетитор',hint:'Выберите всё, чем готовы подрабатывать'},
+  {k:'price',type:'text',label:'Цена, сом',ph:'300',num:1,min:1,err:'Укажите цену'},
+  {k:'per',type:'seg',opts:['За час','За выезд','За смену']},
+  {k:'days',type:'chips',label:'Когда свободны',opts:['Пн','Вт','Ср','Чт','Пт','Сб','Вс'],multi:1,req:1,compact:1},
+  {k:'area',type:'text',label:'Район работы',ph:'Весь Бишкек или район'},
+  {k:'about',type:'textarea',label:'Коротко о себе',ph:'Опыт, свой инструмент, машина…'}]},
+ gig:{title:'Разовое задание',sub:'Исполнители рядом получат уведомление и напишут вам в WhatsApp или Telegram.',btn:'Опубликовать',fields:[
+  {k:'t',type:'text',label:'Что нужно сделать',ph:'Например: грузчики на переезд',min:10,err:'Минимум 10 символов'},
+  {k:'when',type:'chips',label:'Когда',opts:['Сегодня','Завтра','Выбрать дату'],req:1},
+  {k:'time',type:'text',label:'Во сколько и на сколько',ph:'15:00, примерно 3 часа'},
+  {k:'pay',type:'text',label:'Оплата, сом',ph:'1500',num:1,min:1,err:'Укажите оплату'},
+  {k:'per',type:'seg',opts:['За всё','В час','За смену']},
+  {k:'ppl',type:'chips',label:'Сколько человек',opts:['1','2','3','4','5+'],req:1,compact:1},
+  {k:'addr',type:'text',label:'Адрес',ph:'мкр. Джал, 23',min:3,err:'Укажите адрес'},
+  {k:'urg',type:'toggle',label:'⚡ Срочно',hint:'Покажем выше и пришлём уведомление тем, кто рядом'}]}
+};
+let fv={},fErr={},myResume=false,myServices=false;
+function openForm(k){fv={per:0};fErr={};PS={};go('form',k)}
+function form(){
+  const k=cur.form,F=FORMS[k];
+  const chip=(f,o,i)=>{const on=f.multi?(fv[f.k]||[]).includes(i):fv[f.k]===i;return `<button class="chip ${on?'on':''}" style="${f.compact?'padding:0 14px':''}" onclick="pickChip('${f.k}',${i},${!!f.multi})">${o}</button>`};
+  const field=f=>{const e=fErr[f.k];let inner='';
+    if(f.type==='prof')inner=profField(f);
+    if(f.type==='text')inner=`<input ${f.num?'inputmode="numeric"':''} placeholder="${f.ph||''}" value="${fv[f.k]||''}" oninput="fv['${f.k}']=this.value">`;
+    if(f.type==='textarea')inner=`<textarea placeholder="${f.ph}" oninput="fv['${f.k}']=this.value;document.getElementById('cnt_${f.k}').textContent=this.value.length">${fv[f.k]||''}</textarea><div class="xs muted" style="text-align:right;margin-top:4px"><span id="cnt_${f.k}">${(fv[f.k]||'').length}</span>${f.min?' / мин. '+f.min:''}</div>`;
+    if(f.type==='static')inner=`<div class="row" style="background:#EFEEEA;border-radius:16px;padding:15px;gap:8px"><b>${f.val}</b>${tick}<span class="xs muted" style="margin-left:auto">из профиля компании</span></div>`;
+    if(f.type==='chips')inner=`<div class="row" style="flex-wrap:wrap;gap:8px">${f.opts.map((o,i)=>chip(f,o,i)).join('')}</div>`;
+    if(f.type==='seg')inner=`<div class="row" style="background:#EFEEEA;border-radius:14px;padding:4px;gap:4px">${f.opts.map((o,i)=>`<button style="flex:1;height:38px;border-radius:11px;font-size:14px;font-weight:600;${fv[f.k]===i?'background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.08)':'color:var(--muted)'}" onclick="fv['${f.k}']=${i};form()">${o}</button>`).join('')}</div>`;
+    if(f.type==='range')inner=`<div class="row" style="gap:10px"><input inputmode="numeric" placeholder="от" value="${fv.salFrom||''}" oninput="fv.salFrom=this.value" ${fv.neg?'disabled style="opacity:.4"':''}><span class="muted">—</span><input inputmode="numeric" placeholder="до" value="${fv.salTo||''}" oninput="fv.salTo=this.value" ${fv.neg?'disabled style="opacity:.4"':''}></div>`;
+    if(f.type==='toggle')inner=`<div class="row between" style="background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px"><div><b class="s">${f.label}</b>${f.hint?`<div class="xs muted">${f.hint}</div>`:''}</div>
+      <button onclick="fv['${f.k}']=!fv['${f.k}'];form()" style="width:48px;height:28px;border-radius:999px;background:${fv[f.k]?'var(--ok)':'#DAD8D2'};position:relative;flex:none"><span style="position:absolute;top:3px;left:${fv[f.k]?23:3}px;width:22px;height:22px;border-radius:50%;background:#fff;transition:.2s"></span></button></div>`;
+    if(f.type==='photo')inner=`<button class="row" style="gap:14px;width:100%;background:var(--card);border:1px dashed #CFCDC6;border-radius:16px;padding:14px" onclick="fv.photo=1;form();toast('Фото добавлено')">
+      <span style="width:52px;height:52px;border-radius:16px;background:${fv.photo?'linear-gradient(135deg,#34D399,#059669)':'#F1F0EC'};display:grid;place-items:center;color:${fv.photo?'#fff':'var(--muted)'};flex:none">${fv.photo?'F':ic('plus',20)}</span>
+      <span style="text-align:left"><b class="s">${fv.photo?'Фото добавлено':'Добавить фото'}</b><span class="xs muted" style="display:block">${f.hint}</span></span></button>`;
+    const showLabel=f.label&&f.type!=='toggle';
+    return `<div class="field ${e?'err':''}" style="margin-top:${f.type==='seg'?'8px':'20px'}">${showLabel?`<label>${f.label}</label>`:''}${inner}${e?`<div class="hint">${e}</div>`:f.hint&&f.type!=='toggle'&&f.type!=='photo'?`<div class="hint">${f.hint}</div>`:''}</div>`};
+  $('form').innerHTML=`<div class="row" style="gap:12px">${backBtn()}<h2>${F.title}</h2></div>
+    <p class="s muted" style="margin-top:10px;line-height:1.5">${F.sub}</p>
+    ${F.fields.map(field).join('')}
+    <button class="btn red block" style="margin-top:28px" onclick="submitForm()">${F.btn}</button>
+    <p class="note">Перед публикацией объявление проверяет модератор — обычно до 15 минут</p>`;
+}
+function pickChip(k,i,multi){if(multi){const a=fv[k]||[];fv[k]=a.includes(i)?a.filter(x=>x!==i):a.concat(i)}else fv[k]=i;const y=$('form').scrollTop;form();$('form').scrollTop=y}
+function submitForm(){
+  const k=cur.form,F=FORMS[k];fErr={};
+  F.fields.forEach(f=>{const v=fv[f.k];
+    if(f.min&&(v||'').trim().length<f.min)fErr[f.k]=f.err;
+    if(f.req&&(v===undefined||(Array.isArray(v)&&!v.length)))fErr[f.k]='Выберите вариант';});
+  if(k==='vac'&&!fv.neg&&!fv.salFrom)fErr.sal='Укажите зарплату или включите «Договорная»';
+  if(Object.keys(fErr).length){form();const el=$('form').querySelector('.field.err');el&&el.scrollIntoView({behavior:'smooth',block:'center'});toast('Проверьте отмеченные поля');return}
+  if(k==='vac'){const sch=(fv.sch||[]).map(i=>FORMS.vac.fields[6].opts[i]).join(', ');
+    MYV.unshift({id:'mv'+Date.now(),t:fv.t,when:sch,exp:'Ещё 30 дней',wrote:[],hired:[],closed:false});
+    JOBS.unshift({id:'j'+Date.now(),co:'tash',t:fv.t,sal:fv.neg?'Договорная':(fv.salFrom+(fv.salTo?' – '+fv.salTo:'')+' сом'),sched:sch.split(',')[0],exp:FORMS.vac.fields[7].opts[fv.exp],area:fv.addr,dist:'1,2 км',when:'Сегодня'});
+    dealMode='e';go('deals',null,1);toast('Вакансия отправлена на модерацию');return}
+  if(k==='res'){myResume=true;go('me',null,1);toast('Резюме сохранено — работодатели его видят');return}
+  if(k==='svc'){myServices=true;go('me',null,1);toast('Услуги опубликованы');return}
+  MYV.unshift({id:'mv'+Date.now(),t:fv.t,when:FORMS.gig.fields[1].opts[fv.when]+(fv.time?', '+fv.time:''),exp:'Разовое',wrote:[],hired:[],closed:false});
+  dealMode='e';go('deals',null,1);toast('Задание опубликовано — исполнители рядом получили уведомление');
+}
+
+/* ---------- ANTI-ABUSE: «он у нас не работал» ---------- */
+function empNo(id){
+  const c=empConfirms.find(x=>x.id===id),w=WRK[c.w];
+  $('gsheetBody').innerHTML=`<div class="grab"></div><h2>${w.name.split(' ')[0]} у вас не работал?</h2>
+   <div class="panel" style="margin-top:14px;box-shadow:none;background:#F5F4F0">
+    <div class="s" style="line-height:1.55">• Его оценку вы не видели и не увидите до ответа — это нормально.<br>
+    • Отзыв <b>не удалится</b>: он останется с пометкой «Компания оспорила».<br>
+    • Если ${w.name.split(' ')[0]} пришлёт доказательства, отзыв станет подтверждённым, а показатель «Подтверждает отметки» на профиле компании снизится.</div></div>
+   <div class="row" style="margin-top:16px"><button class="btn line sm" style="flex:1" onclick="$('gsheet').classList.remove('on')">Отмена</button>
+   <button class="btn ink sm" style="flex:1" onclick="empConfirms=empConfirms.filter(x=>x.id!=='${id}');$('gsheet').classList.remove('on');renderDeals();toast('Отметка оспорена — передали модератору')">Да, оспорить</button></div>`;
+  $('gsheet').classList.add('on');
+}
+function proofSheet(i){
+  $('gsheetBody').innerHTML=`<div class="grab"></div><h2>Докажите, что работали</h2><p class="s muted" style="margin-top:4px">Модератор проверит за 24 часа. Компания увидит только итог.</p>
+   ${[['📱','Скриншот переписки','Из WhatsApp или Telegram'],['📸','Фото со смены','Бейдж, форма, рабочее место'],['💳','Перевод зарплаты','Скрин из банковского приложения'],['📄','Договор или расчётный лист','Если оформляли']]
+   .map(p=>`<button class="opt" style="width:100%;text-align:left" onclick="doneList[${i}].lvl='review';$('gsheet').classList.remove('on');renderDeals();toast('Отправлено модератору')"><div class="ic" style="background:#F1F0EC;font-size:22px">${p[0]}</div><div style="flex:1"><b>${p[1]}</b><span>${p[2]}</span></div>${ic('right',18)}</button>`).join('')}`;
+  $('gsheet').classList.add('on');
+}
+
+/* ---------- REVIEW ---------- */
+let sc={};
+function review(){
+  const d=deals.find(x=>x.id===cur.review);sc={};
+  const cr=d.mode==='w'?['Оплатил вовремя','Условия как договорились','Отношение']:['Пунктуальность','Качество работы','Общение'];
+  $('review').innerHTML=`<div class="row" style="gap:12px">${backBtn()}<h2>Отзыв</h2></div>
+  <div class="panel" style="margin-top:18px"><span class="xs muted">Работа подтверждена ✓ · оценка уже сохранена</span><h3 style="margin-top:4px">${d.t}</h3><div class="s muted">${d.other}${d.pay?' · '+d.pay:''}</div></div>
+  ${cr.map((c,i)=>`<div style="margin-top:22px"><b>${c}</b><div class="stars" data-c="${i}">${[1,2,3,4,5].map(n=>`<button onclick="rate(${i},${n})">${ic('star',22)}</button>`).join('')}</div></div>`).join('')}
+  <textarea style="margin-top:22px" placeholder="Пара слов о том, как прошла работа (необязательно)"></textarea>
+  <p class="note" style="text-align:left">Отзыв увидят после того, как ${d.other} тоже оценит вас, или через 14 дней.</p>
+  <button class="btn red block" id="sendR" style="margin-top:18px;opacity:.4" onclick="sendR('${d.id}')">Отправить</button>`;
+}
+function rate(c,n){sc[c]=n;document.querySelectorAll(`.stars[data-c="${c}"] button`).forEach((b,i)=>b.classList.toggle('on',i<n));if(Object.keys(sc).length===3)$('sendR').style.opacity=1}
+function sendR(id){if(Object.keys(sc).length<3){toast('Оцените все три пункта');return}deals.find(x=>x.id===id).step=3;back();toast('Спасибо за отзыв')}
+
+/* ---------- PROFILE ---------- */
+function me(){
+  $('me').innerHTML=`<div class="row" style="gap:16px;margin-top:10px"><div class="me-ava" style="width:72px;height:72px;font-size:28px">F</div>
+    <div><h1 style="font-size:26px">Focus</h1><div class="row s muted" style="margin-top:4px">${star(4.8,3)} · Бишкек</div></div></div>
+  <div class="panel row" style="margin-top:18px;gap:12px"><span style="width:10px;height:10px;border-radius:50%;background:${jobStatus==='search'?'var(--ok)':'#C7C5BF'};flex:none"></span>
+    <div style="flex:1"><b class="s">${jobStatus==='search'?'Ищу работу':jobStatus==='other'?'Нашёл работу':'Работаю в '+jobStatus}</b><div class="xs muted">${jobStatus==='search'?'Работодатели видят, что вы открыты':'Вакансии не показываем'}</div></div>
+    <button class="btn ${jobStatus==='search'?'ink':'line'} sm" onclick="${jobStatus==='search'?'foundSheet()':"jobStatus='search';me()"}">${jobStatus==='search'?'Я нашёл работу':'Снова ищу'}</button></div>
+  <div class="stats"><div><b>${verifiedCount()}</b><span>подтверждено</span></div><div><b>${saved.size}</b><span>сохранено</span></div><div style="cursor:pointer" onclick="go('bonus')"><b>${fmt(points)}</b><span>баллов</span></div></div>
+  <div class="menu">${[['doc','Моё резюме',myResume?'<span style=color:var(--ok)>Активно</span>':'Создать',"openForm('res')"],['tool','Мои услуги',myServices?'<span style=color:var(--ok)>Активно</span>':'Добавить',"openForm('svc')"],['brief','Мои публикации','1',"toast('Мои публикации')"],['heart','Сохранённые',saved.size,"toast('Сохранённые')"],['building','Подписки на компании',follow.size,"go('companies',null,1)"]]
+    .map(m=>`<div class="mi" onclick="${m[3]}">${ic(m[0],20)}<span class="g">${m[1]}</span><span class="s muted">${m[2]}</span>${ic('right',18)}</div>`).join('')}</div>
+  <div class="menu">${[['gift','Бонусы и вывод',fmt(points)+' баллов',"go('bonus')"],['gem','PRO',freeLeft+' из 3 контактов',"toast('PRO: безлимит контактов')"],['gear','Настройки','',"toast('Настройки')"]]
+    .map(m=>`<div class="mi" onclick="${m[3]}">${ic(m[0],20)}<span class="g">${m[1]}</span><span class="s muted">${m[2]}</span>${ic('right',18)}</div>`).join('')}</div>`;
+}
+
+/* ---------- BONUS / WITHDRAW ---------- */
+function bonus(){
+  const ok=points>=MIN;
+  $('bonus').innerHTML=`<div class="row" style="gap:12px">${backBtn()}<h2>Бонусы</h2></div>
+  <div class="balance" style="margin-top:18px"><div class="xs" style="opacity:.7">Баланс</div><div style="font-size:40px;font-weight:800;letter-spacing:-.03em;margin-top:4px">${fmt(points)}</div>
+    <div class="s" style="opacity:.8">баллов ≈ ${fmtSom(points*.05)} сом · 100 баллов = 5 сом</div>
+    <button class="btn block" style="margin-top:18px;background:#fff;color:var(--ink);${ok?'':'opacity:.5'}" onclick="${ok?"go('withdraw')":`toast('Вывод от ${fmt(MIN)} баллов')`}">Вывести</button></div>
+  <div class="panel" style="margin-top:14px"><h3>Пригласите друга — +100 баллов</h3><p class="s muted" style="margin-top:4px">Когда друг опубликует резюме или вакансию</p>
+    <button class="btn ink sm block" style="margin-top:14px" onclick="toast('Ссылка скопирована')">Поделиться ссылкой</button></div>`;
+}
+const BANKS=[['mbank','MBank','#0BA360','M'],['odengi','О!Деньги','#E6007E','O'],['elsom','Элсом','#E8A317','Э'],['card','Карта','#0E0E10','💳']];
+function withdraw(){
+  const card=bank==='card';
+  $('withdraw').innerHTML=`<div class="row" style="gap:12px">${backBtn()}<h2>Вывод</h2></div>
+  <div style="text-align:center;margin-top:26px"><div class="xs muted">Вы получите</div><div id="wGet" style="font-size:44px;font-weight:800;letter-spacing:-.04em;margin-top:4px"></div><div class="s muted">доступно ${fmt(points)} баллов</div></div>
+  <div class="field" id="fa"><label>Баллов к выводу</label><div class="row"><input id="wA" inputmode="numeric" value="${points}" oninput="wU()" style="flex:1"><button class="chip" onclick="wA.value=${points};wU()">Всё</button></div><div class="hint" id="wH"></div></div>
+  <div class="field"><label>Куда</label><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">${BANKS.map(b=>`<button class="bank ${bank===b[0]?'on':''}" onclick="bank='${b[0]}';withdraw()"><i style="background:${b[2]}">${b[3]}</i><b class="s">${b[1]}</b></button>`).join('')}</div></div>
+  <div class="field" id="fc"><label>${card?'Номер карты':'Номер телефона'}</label><input id="wC" inputmode="numeric" placeholder="${card?'0000 0000 0000 0000':'+996 ___ ___ ___'}" value="${card?'':'+996 '}"><div class="hint">Деньги придут в течение 24 часов</div></div>
+  <button class="btn red block" id="wB" style="margin-top:24px" onclick="wGo()"></button>`;
+  wU();
+}
+const wVal=()=>parseInt(($('wA').value||'').replace(/\D/g,''))||0;
+function wU(){const a=wVal(),e=a<MIN?`Минимум ${fmt(MIN)} баллов`:a>points?'Недостаточно баллов':'';$('fa').classList.toggle('err',!!e);$('wH').textContent=e||'Без комиссии';
+  $('wGet').textContent=fmtSom(a*.05)+' сом';$('wB').textContent=e?'Вывести':'Вывести '+fmtSom(a*.05)+' сом';$('wB').style.opacity=e?.4:1}
+function wGo(){const a=wVal();if(a<MIN||a>points)return;const n=($('wC').value||'').replace(/\D/g,'');if(n.length<(bank==='card'?16:12)){$('fc').classList.add('err');$('fc').querySelector('.hint').textContent='Проверьте номер';return}
+  points-=a;back();back();go('me',null,1);toast(`Заявка на ${fmtSom(a*.05)} сом принята`)}
+
+/* ---------- NEW GIG ---------- */
+function newgig(){
+  $('newgig').innerHTML=`<div class="row" style="gap:12px">${backBtn()}<h2>Разовое задание</h2></div>
+  <p class="s muted" style="margin-top:10px">Исполнители рядом получат уведомление и напишут вам в WhatsApp или Telegram.</p>
+  <div class="field" id="ft"><label>Что нужно сделать</label><input id="gt" placeholder="Например: грузчики на переезд"><div class="hint">Минимум 10 символов</div></div>
+  <div class="field"><label>Когда</label><div class="chips" style="margin:0"><button class="chip on">Сегодня</button><button class="chip">Завтра</button><button class="chip">Дата</button></div></div>
+  <div class="field"><label>Оплата, сом</label><input inputmode="numeric" value="1500"></div>
+  <div class="field"><label>Адрес</label><input value="мкр. Джал, 23"></div>
+  <button class="btn red block" style="margin-top:26px" onclick="pub()">Опубликовать</button>`;
+  $('newgig').querySelector('.chips').onclick=e=>{if(e.target.classList.contains('chip')){e.currentTarget.querySelectorAll('.chip').forEach(c=>c.classList.remove('on'));e.target.classList.add('on')}};
+}
+function pub(){const t=$('gt').value.trim();if(t.length<10){$('ft').classList.add('err');return}
+  deals.unshift({id:'n'+Date.now(),mode:'e',t,other:'',step:0,when:'Сегодня',pay:'1 500 сом',apps:[{w:'w1',via:'WhatsApp',at:'только что'}]});dealMode='e';go('deals',null,1);toast('Опубликовано')}
+
+document.getElementById('nojs').remove();
+show('home');
+</script>
+</body>
+</html>

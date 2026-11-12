@@ -47,6 +47,8 @@ export interface User {
 export interface Vacancy {
 	id: number
 	title: string
+	voiceUrl?: string | null
+	voiceDuration?: number | null
 	description: string
 	salary: string
 	companyName: string
@@ -140,4 +142,230 @@ export interface BankService {
 export interface WithdrawalInfo {
 	currentPoints: number
 	pointsPerSom: number
+}
+
+// --- ПОДРАБОТКА (DESIGN_SPEC 6.4 / 6.4b) ---
+export type GigPayUnit = 'TOTAL' | 'HOUR' | 'SHIFT'
+export interface Gig {
+	id: number
+	title: string
+	voiceUrl?: string | null
+	voiceDuration?: number | null
+	workDate: string // YYYY-MM-DD
+	timeText?: string
+	pay: number
+	payUnit: GigPayUnit
+	peopleCount: string
+	address: string
+	latitude?: number | null
+	longitude?: number | null
+	distanceKm?: number | null
+	urgent: boolean
+	cityId: number
+	cityName: string
+	authorName: string
+	phone?: string // без PRO — с «***»
+	telegramUsername?: string | null
+	isActive: boolean
+	mine: boolean
+	createdAt: string
+}
+export interface CreateGigData {
+	title: string
+	workDate: string
+	timeText?: string
+	pay: number
+	payUnit: GigPayUnit
+	peopleCount: string
+	address: string
+	latitude?: number | null
+	longitude?: number | null
+	urgent: boolean
+	cityId?: number
+	voiceKey?: string
+	voiceDuration?: number
+}
+
+export type OfferPriceUnit = 'HOUR' | 'VISIT' | 'SHIFT'
+export interface WorkerOffer {
+	id: number
+	skills: string[]
+	price: number
+	priceUnit: OfferPriceUnit
+	days: string[]
+	district?: string
+	about?: string
+	cityId: number
+	cityName: string
+	name: string
+	phone?: string
+	telegramUsername?: string | null
+	isActive: boolean
+	mine: boolean
+	createdAt: string
+}
+export interface UpsertOfferData {
+	skills: string[]
+	price: number
+	priceUnit: OfferPriceUnit
+	days: string[]
+	district?: string
+	about?: string
+	cityId?: number
+	isActive?: boolean
+}
+
+// --- Компании (DESIGN_SPEC 4, 5) ---
+export interface CompanyPhoto {
+	id: number
+	url: string | null
+	caption?: string | null
+}
+export interface Company {
+	id: number
+	name: string
+	type?: string | null
+	sphere?: string | null
+	cityName?: string | null
+	tagline?: string | null
+	coverUrl?: string | null
+	verified: boolean
+	rating: number | null
+	reviewsCount: number
+	paidOnTimePct: number | null
+	confirmRatePct: number | null
+	vacanciesCount: number
+	following: boolean
+	mine: boolean
+	// профиль
+	about?: string | null
+	perks?: string[]
+	staff?: string | null
+	since?: number | null
+	hiredCount?: number
+	followersCount?: number
+	photos?: CompanyPhoto[]
+	bars?: { paidOnTime: number | null; conditions: number | null; attitude: number | null }
+}
+export interface CompanyReview {
+	id: number
+	authorRole: string
+	tenure?: string | null
+	stars: number
+	text?: string | null
+	disputed: boolean
+}
+export interface UpsertCompanyData {
+	name: string
+	type?: string
+	sphere: string
+	tagline?: string
+	about?: string
+	perks?: string[]
+	staff?: string
+	cityId?: number
+}
+
+// --- Отклики и «Где работали» ---
+export interface WorkPlace {
+	place: string
+	role?: string | null
+	period?: string | null
+}
+export type ApplicationStatus = 'NEW' | 'VIEWED' | 'INVITED' | 'REJECTED'
+export interface Application {
+	id: number
+	forEmployer: boolean
+	status: ApplicationStatus
+	message?: string | null
+	createdAt: string
+	vacancyId: number
+	vacancyTitle: string
+	companyName?: string | null
+	vacancySalary?: string | null
+	employerPhone?: string | null
+	employerUsername?: string | null
+	resumeId: number
+	name: string
+	age?: number | null
+	gender?: 'MALE' | 'FEMALE' | null
+	cityName?: string | null
+	categoryName?: string | null
+	subcategoryName?: string | null
+	experience?: number | null
+	description?: string | null
+	photoUrl?: string | null
+	phone?: string | null
+	telegramUsername?: string | null
+	workPlaces: WorkPlace[]
+	workerRating?: number | null
+	confirmedWorks: number
+}
+export interface GigCustomer {
+	userId: number
+	name: string
+	companyId?: number | null
+	verified: boolean
+	coverUrl?: string | null
+	type: string
+	gigsCount: number
+	rating?: number | null
+	openGigs: Gig[]
+}
+
+// --- Сделки (DESIGN_SPEC 7) ---
+export type DealStatus =
+	| 'ASK_WORKER'
+	| 'AWAIT_WORKER'
+	| 'AWAIT_EMPLOYER'
+	| 'CONFIRMED'
+	| 'DISPUTED'
+	| 'PROOF_REVIEW'
+	| 'DECLINED'
+export interface Deal {
+	id: number
+	status: DealStatus
+	source: 'INVITE' | 'HIRE' | 'FOUND'
+	side: 'WORKER' | 'EMPLOYER'
+	title: string
+	whenText: string
+	otherName: string
+	otherCompanyId?: number | null
+	otherVerified: boolean
+	vacancyId?: number | null
+	gigId?: number | null
+	myStars?: number | null
+	otherStars?: number | null
+	dueAt?: string | null
+	canReview: boolean
+	reviewed: boolean
+	createdAt: string
+}
+export interface DealPerson {
+	userId: number
+	applicationId: number
+	name: string
+	rating?: number | null
+	works: number
+}
+export interface DealVacancyRow {
+	vacancyId: number
+	title: string
+	schedule?: string | null
+	active: boolean
+	closeResult?: 'HIRED' | 'NONE' | 'OUTSIDE' | null
+	statusText: string
+	wrote: DealPerson[]
+	hired: string[]
+}
+export interface WorkerDeals {
+	summary: { confirmedWorks: number; badgeGoal: number; verifiedWorker: boolean; pending: number }
+	questions: Deal[]
+	requests: Deal[]
+	works: Deal[]
+}
+export interface EmployerDeals {
+	requests: Deal[]
+	vacancies: DealVacancyRow[]
+	done: Deal[]
 }

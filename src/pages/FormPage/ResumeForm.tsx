@@ -3,16 +3,16 @@ import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { ResumeFormData, resumeSchema } from './schemas'
 import {
+	useGetWorkPlacesQuery,
 	useGetCategoriesQuery,
 	useGetSubcategoriesQuery,
 } from '../../store/store'
-import { FormField } from '.'
-import { ElegantSelect } from '../../../App'
+import { FormField, inputCls } from '.'
+import { ElegantSelect, useToast } from '../../../App'
+import { Segmented } from '../../ui/wk'
+import { MediaPicker, focusFirstError } from './MediaPicker'
+import { WorkPlacesField, cleanWorkPlaces } from './WorkPlacesField'
 import { formatPhoneKG } from '../../../constants'
-
-// Оригинальный стиль инпутов с поддержкой темы
-const inputClass =
-	'w-full bg-secondary border border-white/5 h-14 px-6 rounded-2xl text-sm font-bold focus:outline-none ring-4 ring-transparent focus:ring-red-500/10 transition-all placeholder:text-hint/40 text-main shadow-sm'
 
 interface Props {
 	initialData?: any
@@ -53,8 +53,15 @@ export const ResumeForm: React.FC<Props> = ({
 			gender: 'MALE',
 			description: '',
 			phone: '+996',
+			workPlaces: [],
 		},
 	})
+
+	// Редактирование: подставляем сохранённые места работы
+	const { data: savedPlaces } = useGetWorkPlacesQuery(initialData?.id, { skip: !initialData?.id })
+	useEffect(() => {
+		if (savedPlaces) setValue('workPlaces', savedPlaces)
+	}, [savedPlaces])
 
 	const selectedSphere = watch('sphereId')
 	const selectedCategory = watch('categoryId')
@@ -76,124 +83,118 @@ export const ResumeForm: React.FC<Props> = ({
 	const [selectedVideos, setSelectedVideos] = useState<File[]>([])
 
 	useEffect(() => {
-		if (initialData) reset(initialData)
+		if (initialData) reset({ ...initialData, workPlaces: savedPlaces || [] })
 	}, [initialData, reset])
 
 	useEffect(() => {
 		onMediaChange(selectedPhotos, selectedVideos)
 	}, [selectedPhotos, selectedVideos, onMediaChange])
 
+	const { showToast } = useToast()
+	const onInvalid = () => {
+		showToast('Проверьте отмеченные поля', 'error')
+		focusFirstError()
+	}
+
+	const numberInput = (field: any, placeholder?: string, error?: unknown) => (
+		<input
+			type='number'
+			inputMode='numeric'
+			value={field.value || ''}
+			onChange={(e) =>
+				field.onChange(e.target.value === '' ? '' : Number(e.target.value))
+			}
+			placeholder={placeholder}
+			className={inputCls(error)}
+		/>
+	)
+
 	return (
-		<form onSubmit={handleSubmit(onSubmit)} className='space-y-6'>
-			{/* Ваше Имя */}
-			<FormField label='Ваше Имя' error={errors.name?.message}>
+		<form
+			onSubmit={handleSubmit(
+				(d) => onSubmit({ ...d, workPlaces: cleanWorkPlaces(d.workPlaces as any) }),
+				onInvalid,
+			)}
+			noValidate
+		>
+			<FormField label='Ваше имя' error={errors.name?.message}>
 				<Controller
 					name='name'
 					control={control}
 					render={({ field }) => (
 						<input
 							{...field}
-							placeholder='Иван Иванов'
-							className={inputClass}
+							placeholder='Как к вам обращаться'
+							className={inputCls(errors.name)}
 						/>
 					)}
 				/>
 			</FormField>
 
-			{/* Возраст и Опыт */}
-			<div className='grid grid-cols-2 gap-4'>
+			<div className='grid grid-cols-2 gap-3 wk-field'>
 				<FormField label='Возраст' error={errors.age?.message}>
 					<Controller
 						name='age'
 						control={control}
-						render={({ field }) => (
-							<input
-								type='number'
-								value={field.value || ''}
-								onChange={(e) =>
-									field.onChange(
-										e.target.value === ''
-											? ''
-											: Number(e.target.value),
-									)
-								}
-								placeholder='18'
-								className={inputClass}
-							/>
-						)}
+						render={({ field }) => numberInput(field, '18', errors.age)}
 					/>
 				</FormField>
-				<FormField
-					label='Опыт (лет)'
-					error={errors.experience?.message}
-				>
+				<FormField label='Опыт, лет' error={errors.experience?.message}>
 					<Controller
 						name='experience'
 						control={control}
-						render={({ field }) => (
-							<input
-								type='number'
-								value={field.value || ''}
-								onChange={(e) =>
-									field.onChange(
-										e.target.value === ''
-											? ''
-											: Number(e.target.value),
-									)
-								}
-								placeholder='Лет опыта'
-								className={inputClass}
-							/>
-						)}
+						render={({ field }) =>
+							numberInput(field, '0', errors.experience)
+						}
 					/>
 				</FormField>
 			</div>
 
-			{/* Пол */}
-			<div className='grid grid-cols-2 gap-4'>
+			<FormField label='Пол'>
 				<Controller
 					name='gender'
 					control={control}
 					render={({ field }) => (
-						<ElegantSelect
-							placeholder=''
-							label='Пол'
+						<Segmented
 							value={field.value}
-							options={[
-								{ id: 'MALE', name: 'Мужской', icon: '👨' },
-								{ id: 'FEMALE', name: 'Женский', icon: '👩' },
-							]}
 							onChange={field.onChange}
+							options={[
+								{ value: 'MALE', label: 'Мужской' },
+								{ value: 'FEMALE', label: 'Женский' },
+							]}
 						/>
 					)}
 				/>
-				<FormField label='Телефон' error={errors.phone?.message}>
-					<Controller
-						name='phone'
-						control={control}
-						render={({ field }) => (
-							<input
-								{...field}
-								onChange={(e) =>
-									field.onChange(
-										formatPhoneKG(e.target.value),
-									)
-								}
-								className={inputClass}
-							/>
-						)}
-					/>
-				</FormField>
-			</div>
+			</FormField>
 
-			{/* Bento-блок выбора сферы (bg-secondary/40 для мягкого выделения) */}
-			<div className='space-y-6 p-6 bg-secondary/40 rounded-[2.5rem] border border-white/5 shadow-inner'>
+			<FormField
+				label='Телефон для WhatsApp'
+				error={errors.phone?.message}
+			>
+				<Controller
+					name='phone'
+					control={control}
+					render={({ field }) => (
+						<input
+							{...field}
+							type='tel'
+							inputMode='tel'
+							onChange={(e) =>
+								field.onChange(formatPhoneKG(e.target.value))
+							}
+							className={inputCls(errors.phone)}
+						/>
+					)}
+				/>
+			</FormField>
+
+			<FormField error={errors.cityId?.message}>
 				<Controller
 					name='cityId'
 					control={control}
 					render={({ field }) => (
 						<ElegantSelect
-							placeholder=''
+							placeholder='Выберите город'
 							label='Город'
 							value={field.value}
 							options={cities}
@@ -201,13 +202,16 @@ export const ResumeForm: React.FC<Props> = ({
 						/>
 					)}
 				/>
+			</FormField>
+
+			<FormField error={errors.sphereId?.message}>
 				<Controller
 					name='sphereId'
 					control={control}
 					render={({ field }) => (
 						<ElegantSelect
-							placeholder=''
-							label='Желаемая сфера'
+							placeholder='Выберите вариант'
+							label='Кем хотите работать'
 							value={field.value}
 							options={spheres}
 							onChange={(val) => {
@@ -218,7 +222,10 @@ export const ResumeForm: React.FC<Props> = ({
 						/>
 					)}
 				/>
-				{selectedSphere > 0 && (
+			</FormField>
+
+			{selectedSphere > 0 && (
+				<FormField error={errors.categoryId?.message}>
 					<Controller
 						name='categoryId'
 						control={control}
@@ -241,15 +248,15 @@ export const ResumeForm: React.FC<Props> = ({
 							</div>
 						)}
 					/>
-				)}
-				{selectedCategory > 0 && subcategories.length > 0 && (
+				</FormField>
+			)}
+			{selectedCategory > 0 && subcategories.length > 0 && (
+				<FormField>
 					<Controller
 						name='subcategoryId'
 						control={control}
 						render={({ field }) => (
-							<div
-								className={isSubCatLoading ? 'opacity-60' : ''}
-							>
+							<div className={isSubCatLoading ? 'opacity-60' : ''}>
 								<ElegantSelect
 									placeholder={
 										isSubCatLoading
@@ -264,111 +271,65 @@ export const ResumeForm: React.FC<Props> = ({
 							</div>
 						)}
 					/>
-				)}
-			</div>
+				</FormField>
+			)}
 
-			{/* Блок Медиа */}
-			<div className='space-y-4'>
-				<label className='block text-[10px] font-black text-hint uppercase tracking-widest ml-1'>
-					Фото и Видео
-				</label>
-				<div className='flex gap-2'>
-					<label className='flex-1 h-14 bg-[#111111] text-white rounded-2xl flex items-center justify-center cursor-pointer shadow-lg active:scale-95 transition-all'>
-						<input
-							type='file'
-							multiple
-							accept='image/*'
-							className='hidden'
-							onChange={(e) =>
-								e.target.files &&
-								setSelectedPhotos([
-									...selectedPhotos,
-									...Array.from(e.target.files),
-								])
-							}
-						/>
-						<span className='text-[10px] font-black uppercase'>
-							+ Фото ({selectedPhotos.length})
-						</span>
-					</label>
-					<label className='flex-1 h-14 bg-secondary text-main rounded-2xl flex items-center justify-center cursor-pointer border border-white/10 active:scale-95 transition-all'>
-						<input
-							type='file'
-							multiple
-							accept='video/*'
-							className='hidden'
-							onChange={(e) =>
-								e.target.files &&
-								setSelectedVideos([
-									...selectedVideos,
-									...Array.from(e.target.files),
-								])
-							}
-						/>
-						<span className='text-[10px] font-black uppercase'>
-							+ Видео ({selectedVideos.length})
-						</span>
-					</label>
-				</div>
-
-				{/* Превью */}
-				<div className='flex gap-3 overflow-x-auto no-scrollbar py-2'>
-					{selectedPhotos.map((file, i) => (
-						<div
-							key={i}
-							className='relative shrink-0 w-20 h-20 rounded-2xl overflow-hidden border border-white/10'
-						>
-							<img
-								src={URL.createObjectURL(file)}
-								className='w-full h-full object-cover'
-								alt='preview'
-							/>
-							<button
-								type='button'
-								onClick={() =>
-									setSelectedPhotos(
-										selectedPhotos.filter(
-											(_, idx) => idx !== i,
-										),
-									)
-								}
-								className='absolute top-1 right-1 w-5 h-5 bg-red-600 text-white rounded-full text-[10px] flex items-center justify-center'
-							>
-								×
-							</button>
-						</div>
-					))}
-				</div>
-			</div>
-
-			{/* О себе */}
 			<FormField
-				label='О себе / Навыки'
+				label='Пара слов о себе'
 				error={errors.description?.message}
 			>
 				<Controller
 					name='description'
 					control={control}
 					render={({ field }) => (
-						<textarea
-							{...field}
-							className='w-full bg-secondary border border-white/5 min-h-[160px] p-6 rounded-3xl text-sm font-medium focus:outline-none resize-none text-main placeholder:text-hint/40'
-							placeholder='Расскажите о своих сильных сторонах...'
-						/>
+						<>
+							<textarea
+								{...field}
+								className={inputCls(errors.description)}
+								placeholder='Где работали, что умеете, чем гордитесь'
+							/>
+							<div className='wk-xs text-right' style={{ marginTop: 6 }}>
+								{(field.value || '').length} / мин. 10
+							</div>
+						</>
 					)}
 				/>
 			</FormField>
 
+			<FormField
+				label='Где работали'
+				hint='Необязательно. Работодатель увидит это сразу в вашем отклике'
+			>
+				<Controller
+					name='workPlaces'
+					control={control}
+					render={({ field }) => (
+						<WorkPlacesField value={(field.value as any) || []} onChange={field.onChange} />
+					)}
+				/>
+			</FormField>
+
+						<MediaPicker
+				photos={selectedPhotos}
+				videos={selectedVideos}
+				onPhotos={setSelectedPhotos}
+				onVideos={setSelectedVideos}
+				subtitle='С фото откликаются в 2 раза чаще'
+			/>
+
 			<button
 				type='submit'
 				disabled={loading}
-				className='w-full py-6 bg-[#111111] text-white rounded-[2rem] font-black uppercase text-xs tracking-widest shadow-xl active:scale-[0.98] transition-all'
+				className='wk-btn wk-btn--red wk-btn--block'
+				style={{ marginTop: 28 }}
 			>
-				{loading
-					? 'Загрузка...'
-					: initialData
-						? 'Сохранить изменения'
-						: 'Опубликовать резюме'}
+				{loading ? (
+					<span className='wk-spinner' />
+				) : initialData ? (
+					'Сохранить изменения'
+				) : (
+					'Сохранить резюме'
+				)}
 			</button>
 		</form>
 	)

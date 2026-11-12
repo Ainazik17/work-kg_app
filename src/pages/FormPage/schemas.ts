@@ -26,6 +26,9 @@ export const vacancySchema = z.object({
 	latitude: z.number().optional().nullable(),
 	longitude: z.number().optional().nullable(),
 	preferredGender: z.enum(['MALE', 'FEMALE', 'ANY']),
+	// Голосовое: ключ из /bot/voice; '' — удалить, undefined — не менять
+	voiceKey: z.string().optional(),
+	voiceDuration: z.number().optional(),
 })
 
 export const resumeSchema = z.object({
@@ -35,6 +38,16 @@ export const resumeSchema = z.object({
 	experience: z.coerce.number().default(0),
 	gender: z.enum(['MALE', 'FEMALE']),
 	phone: z.string().min(10, 'Введите корректный номер'),
+	// «Где работали» — необязательно, пустые строки отбрасываются при отправке
+	workPlaces: z
+		.array(
+			z.object({
+				place: z.string(),
+				role: z.string().nullish(),
+				period: z.string().nullish(),
+			}),
+		)
+		.optional(),
 })
 
 export type VacancyFormData = z.infer<typeof vacancySchema>
