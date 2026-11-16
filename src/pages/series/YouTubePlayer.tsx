@@ -87,10 +87,11 @@ export const YouTubePlayer: React.FC<Props> = ({ videoId, poster, onEnded }) => 
 					modestbranding: 1,
 					iv_load_policy: 3,
 					playsinline: 1,
-					cc_load_policy: 0,
+					cc_load_policy: 0, // субтитры выключены (и снимаем модуль субтитров ниже)
 				},
 				events: {
 					onReady: () => {
+						hideCaptions(player.current)
 						if (cancelled) return
 						setReady(true)
 						setDuration(player.current?.getDuration?.() || 0)
@@ -98,6 +99,7 @@ export const YouTubePlayer: React.FC<Props> = ({ videoId, poster, onEnded }) => 
 					onStateChange: (e: any) => {
 						const st = e.data
 						if (st === 1) {
+							hideCaptions(player.current)
 							setPlaying(true)
 							setStarted(true)
 							setDuration(player.current?.getDuration?.() || 0)
@@ -213,7 +215,11 @@ export const YouTubePlayer: React.FC<Props> = ({ videoId, poster, onEnded }) => 
 					: { position: 'relative', width: '100%', height: '100%', background: '#000' }
 			}
 		>
-			<div ref={mount} style={{ position: 'absolute', inset: 0 }} />
+			{/* Плеер YouTube выше рамки на CROP px сверху и снизу: видео 16:9 остаётся по центру,
+			    а полоса с аватаром канала и названием (верх) и логотип YouTube (низ) уходят за край */}
+			<div style={{ position: 'absolute', inset: 0, overflow: 'hidden' }}>
+				<div ref={mount} style={{ position: 'absolute', left: 0, right: 0, top: -CROP, bottom: -CROP }} />
+			</div>
 
 			{/* Щит: iframe никогда не нажимается напрямую, кроме кнопки ▶ в центре в запасном режиме iOS */}
 			{started ? (
@@ -318,6 +324,20 @@ export const YouTubePlayer: React.FC<Props> = ({ videoId, poster, onEnded }) => 
 			)}
 		</div>
 	)
+}
+
+/** Насколько обрезаем плеер YouTube сверху и снизу, px (полоса с названием ~60 px) */
+const CROP = 72
+
+/** Выключить субтитры, даже если они включены у видео по умолчанию */
+const hideCaptions = (p: any) => {
+	try {
+		p?.unloadModule?.('captions')
+		p?.unloadModule?.('cc')
+		p?.setOption?.('captions', 'track', {})
+	} catch {
+		/* модуля субтитров нет — и хорошо */
+	}
 }
 
 const btn: React.CSSProperties = {
