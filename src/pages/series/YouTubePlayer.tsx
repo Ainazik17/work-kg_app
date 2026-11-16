@@ -51,8 +51,11 @@ export const YouTubePlayer: React.FC<Props> = ({ videoId, poster, onEnded }) => 
 	endedRef.current = onEnded
 	const [ready, setReady] = useState(false)
 	const [playing, setPlaying] = useState(false)
-	// До первого запуска нажатие проходит в iframe (iOS разрешает звук только после касания самого плеера)
 	const [started, setStarted] = useState(false)
+	// До запуска плеер YouTube (название, логотип) закрыт нашей обложкой.
+	// iOS иногда не даёт запустить видео из своей кнопки — тогда открываем только кнопку ▶ самого плеера.
+	const [needTap, setNeedTap] = useState(false)
+	const startTimer = useRef<number | undefined>(undefined)
 	const [time, setTime] = useState(0)
 	const [duration, setDuration] = useState(0)
 	const [full, setFull] = useState(false)
@@ -64,6 +67,7 @@ export const YouTubePlayer: React.FC<Props> = ({ videoId, poster, onEnded }) => 
 		setReady(false)
 		setPlaying(false)
 		setStarted(false)
+		setNeedTap(false)
 		setTime(0)
 		loadApi().then((YT) => {
 			if (cancelled || !mount.current) return
@@ -132,6 +136,22 @@ export const YouTubePlayer: React.FC<Props> = ({ videoId, poster, onEnded }) => 
 	}
 	useEffect(() => () => window.clearTimeout(hideTimer.current), [])
 
+	// Своя кнопка ▶ на обложке. Не запустилось за 1.5 с (iOS) — просим нажать ▶ в самом плеере
+	const start = () => {
+		const p = player.current
+		if (!p) return
+		try {
+			p.playVideo()
+		} catch {
+			/* ignore */
+		}
+		window.clearTimeout(startTimer.current)
+		startTimer.current = window.setTimeout(() => {
+			if (p.getPlayerState?.() !== 1) setNeedTap(true)
+		}, 1500)
+	}
+	useEffect(() => () => window.clearTimeout(startTimer.current), [])
+
 	const toggle = () => {
 		const p = player.current
 		if (!p) return
@@ -195,27 +215,52 @@ export const YouTubePlayer: React.FC<Props> = ({ videoId, poster, onEnded }) => 
 		>
 			<div ref={mount} style={{ position: 'absolute', inset: 0 }} />
 
-			{/* Щит. До первого запуска закрываем верх (название, «Поделиться») и низ (логотип YouTube),
-			    середину с кнопкой ▶ оставляем — первое касание должно попасть в сам плеер. */}
-			{!started ? (
-				<>
-					<div onContextMenu={block} style={{ position: 'absolute', left: 0, right: 0, top: 0, height: '28%' }} />
-					<div onContextMenu={block} style={{ position: 'absolute', left: 0, right: 0, bottom: 0, height: '28%' }} />
-					<div onContextMenu={block} style={{ position: 'absolute', left: 0, top: '28%', bottom: '28%', width: '28%' }} />
-					<div onContextMenu={block} style={{ position: 'absolute', right: 0, top: '28%', bottom: '28%', width: '28%' }} />
-				</>
-			) : (
+			{/* Щит: iframe никогда не нажимается напрямую, кроме кнопки ▶ в центре в запасном режиме iOS */}
+			{started ? (
 				<div
 					onClick={toggle}
 					onContextMenu={block}
 					onMouseMove={poke}
 					style={{ position: 'absolute', inset: 0, cursor: 'pointer' }}
 				/>
-			)}
-
-			{/* Пока плеер не загрузился — обложка */}
-			{!ready && poster && (
-				<img src={poster} alt='' style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
+			) : needTap ? (
+				<>
+					{/* верх (название) и низ (логотип YouTube) закрыты, середина с кнопкой ▶ — открыта */}
+					<div onContextMenu={block} style={{ position: 'absolute', left: 0, right: 0, top: 0, height: '30%', background: '#000' }} />
+					<div onContextMenu={block} style={{ position: 'absolute', left: 0, right: 0, bottom: 0, height: '30%', background: '#000' }}>
+						<div style={{ color: '#fff', fontSize: 13, textAlign: 'center', marginTop: 10, opacity: 0.85 }}>
+							Нажмите ▶ ещё раз
+						</div>
+					</div>
+					<div onContextMenu={block} style={{ position: 'absolute', left: 0, top: '30%', bottom: '30%', width: '30%', background: '#000' }} />
+					<div onContextMenu={block} style={{ position: 'absolute', right: 0, top: '30%', bottom: '30%', width: '30%', background: '#000' }} />
+				</>
+			) : (
+				/* Обложка с нашей кнопкой ▶ поверх всего плеера YouTube */
+				<div
+					onClick={start}
+					onContextMenu={block}
+					className='flex items-center justify-center'
+					style={{ position: 'absolute', inset: 0, background: '#000', cursor: 'pointer' }}
+				>
+					{poster && (
+						<img src={poster} alt='' style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
+					)}
+					<span
+						className='flex items-center justify-center'
+						style={{
+							position: 'relative',
+							width: 64,
+							height: 64,
+							borderRadius: 999,
+							background: 'rgba(255,255,255,.92)',
+							color: '#000',
+							opacity: ready ? 1 : 0.5,
+						}}
+					>
+						<Play size={28} fill='currentColor' />
+					</span>
+				</div>
 			)}
 
 			{/* На паузе прячем то, что YouTube показывает поверх видео (название, похожие ролики) */}
@@ -223,7 +268,7 @@ export const YouTubePlayer: React.FC<Props> = ({ videoId, poster, onEnded }) => 
 				<div
 					onClick={toggle}
 					className='flex items-center justify-center'
-					style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,.55)', cursor: 'pointer' }}
+					style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,.88)', cursor: 'pointer' }}
 				>
 					<span
 						className='flex items-center justify-center'
