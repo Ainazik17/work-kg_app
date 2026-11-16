@@ -2,15 +2,17 @@
 import React from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useToast } from '../../../App'
-import { useGetOfferQuery } from '../../store/store'
+import { useContactOfferAuthorMutation, useGetOfferQuery } from '../../store/store'
+import { ContactButtons } from '../../ui/ContactButtons'
 import { Avatar, Button, EmptyState, FactTiles, Loader, Perk, ScreenHeader, payText } from '../../ui/wk'
-import { isMasked, openTelegram, openWhatsApp } from '../../ui/contact'
+import { isMasked } from '../../ui/contact'
 
 const OfferPage: React.FC<{ telegramId: number }> = ({ telegramId }) => {
 	const navigate = useNavigate()
 	const { id } = useParams()
 	const { showToast } = useToast()
 	const { data: o, isLoading, isError } = useGetOfferQuery({ id: Number(id), tid: telegramId })
+	const [contactAuthor] = useContactOfferAuthorMutation()
 
 	if (isLoading) return <Loader />
 	if (isError || !o)
@@ -21,7 +23,7 @@ const OfferPage: React.FC<{ telegramId: number }> = ({ telegramId }) => {
 			</div>
 		)
 
-	const locked = !o.mine && isMasked(o.phone)
+	const locked = !o.mine && (o.contactsOpen === undefined ? isMasked(o.phone) : !o.contactsOpen)
 
 	return (
 		<div className='wk-screen wk-enter text-left' style={{ paddingBottom: 170 }}>
@@ -79,23 +81,14 @@ const OfferPage: React.FC<{ telegramId: number }> = ({ telegramId }) => {
 							Открыть контакты · PRO
 						</Button>
 					) : (
-						<div className='grid grid-cols-2' style={{ gap: 10 }}>
-							<Button
-								variant='wa'
-								onClick={() =>
-									openWhatsApp(o.phone, `Здравствуйте, ${o.name}! Нашёл(ла) ваши услуги в Work KG`) ||
-									showToast('Номер телефона не указан', 'error')
-								}
-							>
-								WhatsApp
-							</Button>
-							<Button
-								variant='tg'
-								onClick={() => openTelegram(o.telegramUsername) || showToast('У исполнителя нет username в Telegram', 'error')}
-							>
-								Telegram
-							</Button>
-						</div>
+						<ContactButtons
+							phone={o.phone}
+							telegramUsername={o.telegramUsername}
+							waText={`Здравствуйте, ${o.name}! Нашёл(ла) ваши услуги в Work KG`}
+							whom='исполнителю'
+							toast={showToast}
+							relay={async () => (await contactAuthor({ id: o.id, tid: telegramId }).unwrap()).sent}
+						/>
 					)}
 					{locked && <p className='wk-note'>Контакты исполнителя доступны с PRO</p>}
 				</div>

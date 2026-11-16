@@ -4,7 +4,8 @@ import React from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { MapPin, Share } from 'lucide-react'
 import { useToast } from '../../../App'
-import { useDeleteGigMutation, useGetGigQuery, useUpdateGigStatusMutation } from '../../store/store'
+import { useContactGigAuthorMutation, useDeleteGigMutation, useGetGigQuery, useUpdateGigStatusMutation } from '../../store/store'
+import { ContactButtons } from '../../ui/ContactButtons'
 import {
 	IconButton,
 	Avatar,
@@ -19,7 +20,7 @@ import {
 	gigTime,
 	payText,
 } from '../../ui/wk'
-import { isMasked, open2GIS, openTelegram, openWhatsApp, shareListing } from '../../ui/contact'
+import { isMasked, open2GIS, shareListing } from '../../ui/contact'
 
 const GigPage: React.FC<{ telegramId: number }> = ({ telegramId }) => {
 	const navigate = useNavigate()
@@ -28,6 +29,7 @@ const GigPage: React.FC<{ telegramId: number }> = ({ telegramId }) => {
 	const { data: gig, isLoading, isError } = useGetGigQuery({ id: Number(id), tid: telegramId })
 	const [setStatus, { isLoading: toggling }] = useUpdateGigStatusMutation()
 	const [remove] = useDeleteGigMutation()
+	const [contactAuthor] = useContactGigAuthorMutation()
 
 	if (isLoading) return <Loader />
 	if (isError || !gig)
@@ -38,7 +40,8 @@ const GigPage: React.FC<{ telegramId: number }> = ({ telegramId }) => {
 			</div>
 		)
 
-	const locked = !gig.mine && isMasked(gig.phone)
+	// contactsOpen с бэкенда; старый ответ без поля — по маске телефона
+	const locked = !gig.mine && (gig.contactsOpen === undefined ? isMasked(gig.phone) : !gig.contactsOpen)
 	const waText = `Здравствуйте! Пишу по заданию «${gig.title}» из Work KG`
 
 	return (
@@ -154,20 +157,14 @@ const GigPage: React.FC<{ telegramId: number }> = ({ telegramId }) => {
 							Открыть контакты · PRO
 						</Button>
 					) : (
-						<div className='grid grid-cols-2' style={{ gap: 10 }}>
-							<Button
-								variant='wa'
-								onClick={() => openWhatsApp(gig.phone, waText) || showToast('Номер телефона не указан', 'error')}
-							>
-								WhatsApp
-							</Button>
-							<Button
-								variant='tg'
-								onClick={() => openTelegram(gig.telegramUsername) || showToast('У заказчика нет username в Telegram', 'error')}
-							>
-								Telegram
-							</Button>
-						</div>
+						<ContactButtons
+							phone={gig.phone}
+							telegramUsername={gig.telegramUsername}
+							waText={waText}
+							whom='заказчику'
+							toast={showToast}
+							relay={async () => (await contactAuthor({ id: gig.id, tid: telegramId }).unwrap()).sent}
+						/>
 					)}
 					{locked && <p className='wk-note'>Контакты заказчика доступны с PRO</p>}
 				</div>

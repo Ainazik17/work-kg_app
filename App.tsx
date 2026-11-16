@@ -48,6 +48,7 @@ import {
 	Settings,
 	Wallet,
 	Wrench,
+	Clapperboard,
 } from 'lucide-react'
 import {
 	Avatar,
@@ -82,7 +83,7 @@ import {
 } from './src/ui/wk'
 import { ListingView } from './src/ui/ListingView'
 import { BANK_SERVICES, formatPhoneKG, formatDate } from './constants'
-import { User, Media, Vacancy, Resume } from './types'
+import { User, Media, Vacancy, Resume, SocialTask } from './types'
 import { GamesPage } from './src/pages/games/ui/GamesPage'
 import { ProfileDetail } from './src/pages/ProfileDetail'
 import CreatePage from './src/pages/FormPage/CreatePage'
@@ -99,6 +100,9 @@ import {
 import {
 	useGetUserQuery,
 	useRegisterUserMutation,
+	useSyncUserMutation,
+	useGetSocialTasksQuery,
+	useCheckTaskMutation,
 	useGetCitiesQuery,
 	useGetSpheresQuery,
 	useGetCategoriesQuery,
@@ -152,6 +156,8 @@ import SavedPage from './src/pages/me/SavedPage'
 import DealsPage from './src/pages/deals/DealsPage'
 import ReviewPage from './src/pages/deals/ReviewPage'
 import NotifySettingsPage from './src/pages/me/NotifySettingsPage'
+import { SeriesListPage, SeriesPage } from './src/pages/series/SeriesPage'
+import { SeriesPromo } from './src/pages/series/SeriesPromo'
 import { SaveHeart } from './src/ui/save'
 import { shareListing } from './src/ui/contact'
 
@@ -733,6 +739,9 @@ const HomePage: React.FC<{ user: User | null }> = ({ user }: any) => {
 				<Search size={20} strokeWidth={1.8} />
 				<span className='wk-search__ph'>Должность или компания</span>
 			</button>
+
+			{/* Реклама сериала — видна на обеих вкладках главной */}
+			<SeriesPromo telegramId={telegramId} />
 
 			<Tabs
 				className='mt-[22px]'
@@ -1733,6 +1742,12 @@ const ProfilePage: React.FC<{ telegramId: number }> = ({ telegramId }) => {
 							onClick: () => navigate('/following'),
 						},
 						{
+							icon: <Clapperboard size={20} strokeWidth={1.8} />,
+							label: 'Сериал',
+							value: '1-я серия бесплатно',
+							onClick: () => navigate('/series'),
+						},
+						{
 							icon: <Gift size={20} strokeWidth={1.8} />,
 							label: 'Бонусы',
 							value: 'Пригласить друга',
@@ -2245,7 +2260,7 @@ export const SubscriptionPage: React.FC<{ telegramId: number }> = ({
 						padding: '8px 12px',
 					}}
 				>
-					🔥 Эта тарификация действует только до 15 мая
+					🔥 Эта тарификация действует только до 31 декабря
 				</div>
 			)}
 
@@ -2365,26 +2380,42 @@ export const BonusesPage: React.FC<{ telegramId: number }> = ({
 		tg.HapticFeedback.impactOccurred('medium')
 	}
 
-	// RTK Query не имеет автоматического хука для "проверки по клику" в стиле query,
-	// поэтому для задач лучше использовать refetch или запрашивать данные вручную через lazy query.
-	// Но здесь мы просто вызовем проверку:
-	const handleTask = async (taskId: string) => {
-		showToast('Проверяем подписку...', 'info')
+	// Задания «Подпишитесь на канал»: открыть канал → «Проверить» (бэкенд: POST /bot/tasks/{id}/check)
+	const { data: tasks } = useGetSocialTasksQuery(telegramId)
+	const [checkTask] = useCheckTaskMutation()
+	const [checking, setChecking] = useState<number | null>(null)
+	const [opened, setOpened] = useState<Record<number, boolean>>({})
+
+	const openTask = (task: SocialTask) => {
+		setOpened((p) => ({ ...p, [task.id]: true }))
+		if (/^https?:\/\/t(elegram)?\.me\//.test(task.link) && tg?.openTelegramLink) tg.openTelegramLink(task.link)
+		else if (tg?.openLink) tg.openLink(task.link)
+		else window.open(task.link, '_blank')
+	}
+
+	const handleTask = async (task: SocialTask) => {
+		if (!opened[task.id]) {
+			openTask(task)
+			return
+		}
+		setChecking(task.id)
 		try {
-			// В apiService был метод checkSocialTask. В RTK мы можем использовать lazyQuery
-			// Для простоты здесь оставим логику получения через refetch после действия
-			const res = await fetch(
-				`${import.meta.env.VITE_API_BASE_URL}/bot/tasks/${taskId}/check?telegramId=${telegramId}`,
-				{ headers: tg?.initData ? { 'X-Telegram-Init-Data': tg.initData } : {} },
-			).then((r) => r.json())
-			if (res.success) {
+			const res = await checkTask({ tid: telegramId, taskId: task.id }).unwrap()
+			if (res.status === 'DONE') {
 				showToast(`Успешно! Начислено ${res.earned} баллов`, 'success')
-				refetch() // Обновляем данные партнерки
-			} else {
+				refetch()
+			} else if (res.status === 'ALREADY_DONE') {
+				showToast('Задание уже выполнено', 'info')
+			} else if (res.status === 'NOT_SUBSCRIBED') {
 				showToast('Сначала подпишитесь на канал', 'error')
+				openTask(task)
+			} else {
+				showToast(res.message || 'Не удалось проверить подписку. Попробуйте позже', 'error')
 			}
-		} catch (e) {
-			showToast('Ошибка проверки', 'error')
+		} catch (e: any) {
+			showToast(e?.data?.message || 'Нет связи с сервером. Попробуйте ещё раз', 'error')
+		} finally {
+			setChecking(null)
 		}
 	}
 
@@ -2467,21 +2498,28 @@ export const BonusesPage: React.FC<{ telegramId: number }> = ({
 				</Button>
 			</Panel>
 
-			<SectionHead title='Задания' />
-			<SheetOption
-				icon='✈️'
-				title='Наш канал'
-				subtitle='+50 баллов за подписку'
-				onClick={() => handleTask('tg_sub')}
-				right={
-					<span
-						className='wk-btn wk-btn--line wk-btn--xs'
-						style={{ pointerEvents: 'none' }}
-					>
-						Проверить
-					</span>
-				}
-			/>
+			{!!tasks?.availableTasks?.length && (
+				<>
+					<SectionHead title='Задания' />
+					{tasks.availableTasks.map((task) => (
+						<SheetOption
+							key={task.id}
+							icon={task.type === 'TELEGRAM' ? '✈️' : '⭐️'}
+							title={task.title}
+							subtitle={`+${fmtNum(task.reward)} баллов за подписку`}
+							onClick={() => handleTask(task)}
+							right={
+								<span
+									className='wk-btn wk-btn--line wk-btn--xs'
+									style={{ pointerEvents: 'none' }}
+								>
+									{checking === task.id ? '…' : opened[task.id] ? 'Проверить' : 'Подписаться'}
+								</span>
+							}
+						/>
+					))}
+				</>
+			)}
 		</div>
 	)
 }
@@ -2528,8 +2566,21 @@ const AppContent: React.FC = () => {
 		else if (open === 'deals') navigate('/deals')
 		else if (open === 'deals_e') navigate('/deals?tab=employer')
 		else if (open === 'saved') navigate('/saved')
+		else if (open === 'series') navigate('/series')
+		else if (/^series_\d+$/.test(open)) navigate(`/series/${open.slice(7)}`)
 		else if (open === 'pro') navigate('/subscription')
 	}, [])
+
+	// username мог появиться/смениться после регистрации — без него кнопка «Telegram» у объявлений не работала
+	const [syncUser] = useSyncUserMutation()
+	useEffect(() => {
+		const u = tg?.initDataUnsafe?.user
+		if (!user || !u) return
+		const fresh = (u.username || '').trim()
+		if (fresh !== ((user as any).username || '').trim()) {
+			syncUser({ tid: telegramId, data: { username: fresh } })
+		}
+	}, [user?.telegramId, (user as any)?.username])
 
 	// Логика автоматической регистрации
 	useEffect(() => {
@@ -2794,6 +2845,8 @@ const AppContent: React.FC = () => {
 						element={<MyApplicationsPage telegramId={telegramId} />}
 					/>
 					<Route path='/saved' element={<SavedPage telegramId={telegramId} />} />
+					<Route path='/series' element={<SeriesListPage telegramId={telegramId} />} />
+					<Route path='/series/:id' element={<SeriesPage telegramId={telegramId} />} />
 					<Route path='/deals' element={<DealsPage telegramId={telegramId} />} />
 					<Route path='/deal/:id/review' element={<ReviewPage telegramId={telegramId} />} />
 					<Route path='/notifications' element={<NotifySettingsPage telegramId={telegramId} />} />

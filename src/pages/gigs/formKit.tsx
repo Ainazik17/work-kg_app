@@ -48,3 +48,22 @@ export function useSubmitCheck<E extends Record<string, string | undefined>>(err
 	}
 	return { shown, attempt }
 }
+
+/** Номер для WhatsApp в формах подработки: +996 и 9 цифр */
+export const phoneError = (phone: string) =>
+	phone.replace(/\D/g, '').length === 12 ? undefined : 'Укажите номер WhatsApp: +996 и 9 цифр'
+
+/**
+ * Подставить известный номер (профиль, прошлые вакансии/резюме), если в черновике пусто.
+ * Mini App регистрирует без телефона, поэтому без этого поля заказчику некуда было писать в WhatsApp.
+ */
+export function usePrefillPhone(known: string | null | undefined, current: string, setPhone: (p: string) => void) {
+	useEffect(() => {
+		if (known && current.replace(/\D/g, '').length <= 3) setPhone(known)
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [known])
+}
+
+/** Есть ли у текущего пользователя username в Telegram (без него пишут через бота) */
+export const myTelegramUsername = (): string =>
+	((window as any).Telegram?.WebApp?.initDataUnsafe?.user?.username as string) || ''

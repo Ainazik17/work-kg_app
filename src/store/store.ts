@@ -25,6 +25,9 @@ import {
 	WorkerDeals,
 	EmployerDeals,
 	DealVacancyRow,
+	Series,
+	SocialTaskList,
+	TaskCheckResult,
 } from '@/types'
 
 const API_BASE_URL =
@@ -56,6 +59,7 @@ export const workKgApi = createApi({
 		'Saved',
 		'Notify',
 		'Deal',
+		'Series',
 	],
 	endpoints: (builder) => ({
 		// --- ПОЛЬЗОВАТЕЛЬ ---
@@ -741,6 +745,40 @@ export const workKgApi = createApi({
 			query: (tid) => ({ url: '/bot/gigs/top-customers', params: tid ? { telegramId: tid } : {} }),
 			providesTags: ['Gig', 'Company'],
 		}),
+		// Профиль: телефон (в т.ч. из прошлых вакансий/резюме) — подставляем в формы подработки
+		getUserProfile: builder.query<{ phone?: string | null; username?: string | null }, number>({
+			query: (tid) => `/bot/users/${tid}/profile`,
+			providesTags: ['User'],
+		}),
+		// Актуальный username/имя из Telegram (пользователь мог завести username после регистрации)
+		syncUser: builder.mutation<void, { tid: number; data: { username?: string; firstName?: string; lastName?: string } }>({
+			query: ({ tid, data }) => ({ url: `/bot/users/${tid}`, method: 'PUT', body: data }),
+		}),
+		// Автор без username: бот пересылает ему, что с ним хотят связаться
+		contactGigAuthor: builder.mutation<{ sent: boolean }, { id: number; tid: number }>({
+			query: ({ id, tid }) => ({ url: `/bot/gigs/${id}/contact`, method: 'POST', params: { telegramId: tid } }),
+		}),
+		contactOfferAuthor: builder.mutation<{ sent: boolean }, { id: number; tid: number }>({
+			query: ({ id, tid }) => ({ url: `/bot/offers/${id}/contact`, method: 'POST', params: { telegramId: tid } }),
+		}),
+		// Задания «Подпишитесь на канал» на экране «Бонусы»
+		getSocialTasks: builder.query<SocialTaskList, number>({
+			query: (tid) => `/bot/tasks/${tid}`,
+			providesTags: ['Referral'],
+		}),
+		checkTask: builder.mutation<TaskCheckResult, { tid: number; taskId: number }>({
+			query: ({ tid, taskId }) => ({ url: `/bot/tasks/${taskId}/check`, method: 'POST', params: { telegramId: tid } }),
+			invalidatesTags: ['Referral', 'User'],
+		}),
+		// Раздел «Сериал»
+		getSeriesList: builder.query<Series[], number>({
+			query: (tid) => ({ url: '/bot/series', params: { telegramId: tid } }),
+			providesTags: ['Series', 'Subscription'],
+		}),
+		getSeries: builder.query<Series, { id: number; tid: number }>({
+			query: ({ id, tid }) => ({ url: `/bot/series/${id}`, params: { telegramId: tid } }),
+			providesTags: ['Series', 'Subscription'],
+		}),
 		deleteCompanyPhoto: builder.mutation<void, { tid: number; photoId: number }>({
 			query: ({ tid, photoId }) => ({
 				url: `/bot/companies/photos/${photoId}`,
@@ -755,6 +793,14 @@ export const workKgApi = createApi({
 export const {
 	useGetUserQuery,
 	useRegisterUserMutation,
+	useGetUserProfileQuery,
+	useSyncUserMutation,
+	useContactGigAuthorMutation,
+	useContactOfferAuthorMutation,
+	useGetSocialTasksQuery,
+	useCheckTaskMutation,
+	useGetSeriesListQuery,
+	useGetSeriesQuery,
 	useGetCitiesQuery,
 	useGetSpheresQuery,
 	useGetCategoriesQuery,

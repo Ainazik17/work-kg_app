@@ -166,6 +166,9 @@ export interface Gig {
 	authorName: string
 	phone?: string // без PRO — с «***»
 	telegramUsername?: string | null
+	contactsOpen?: boolean // PRO или своё объявление
+	hasPhone?: boolean
+	hasTelegram?: boolean // нет username — пишем автору через бота
 	isActive: boolean
 	mine: boolean
 	createdAt: string
@@ -184,6 +187,7 @@ export interface CreateGigData {
 	cityId?: number
 	voiceKey?: string
 	voiceDuration?: number
+	phone?: string // WhatsApp для связи
 }
 
 export type OfferPriceUnit = 'HOUR' | 'VISIT' | 'SHIFT'
@@ -200,6 +204,9 @@ export interface WorkerOffer {
 	name: string
 	phone?: string
 	telegramUsername?: string | null
+	contactsOpen?: boolean // PRO или своё объявление
+	hasPhone?: boolean
+	hasTelegram?: boolean // нет username — пишем автору через бота
 	isActive: boolean
 	mine: boolean
 	createdAt: string
@@ -213,6 +220,7 @@ export interface UpsertOfferData {
 	about?: string
 	cityId?: number
 	isActive?: boolean
+	phone?: string // WhatsApp для связи
 }
 
 // --- Компании (DESIGN_SPEC 4, 5) ---
@@ -368,4 +376,46 @@ export interface EmployerDeals {
 	requests: Deal[]
 	vacancies: DealVacancyRow[]
 	done: Deal[]
+}
+
+// --- СЕРИАЛ ---
+export interface SeriesEpisode {
+	id: number
+	number: number
+	title: string
+	description?: string | null
+	thumbnailUrl?: string | null
+	durationSec?: number | null
+	free: boolean // 1-я серия (или отмеченная) — бесплатно
+	locked: boolean // нужен тариф
+	videoUrl?: string | null // только у открытых
+	youtubeId?: string | null // только у открытых
+}
+export interface Series {
+	id: number
+	title: string
+	description?: string | null
+	coverUrl?: string | null
+	episodesCount: number
+	hasAccess: boolean
+	episodes?: SeriesEpisode[]
+}
+
+// --- ЗАДАНИЯ (подписка на канал) ---
+export interface SocialTask {
+	id: number
+	type: 'TELEGRAM' | 'INSTAGRAM' | 'FACEBOOK' | 'TIKTOK' | 'YOUTUBE'
+	title: string
+	link: string
+	reward: number
+}
+export interface SocialTaskList {
+	availableTasks: SocialTask[]
+	completedTasks: { taskId: number; title: string; rewardGiven: number; completedAt: string }[]
+}
+export interface TaskCheckResult {
+	status: 'DONE' | 'ALREADY_DONE' | 'NOT_SUBSCRIBED' | 'CHECK_FAILED'
+	success: boolean
+	earned: number
+	message: string
 }

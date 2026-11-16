@@ -2,11 +2,12 @@
 import React, { useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { AddressAutocomplete2GIS, useToast } from '../../../App'
-import { useCreateGigMutation } from '../../store/store'
+import { useCreateGigMutation, useGetUserProfileQuery } from '../../store/store'
+import { formatPhoneKG } from '../../../constants'
 import type { GigPayUnit } from '../../../types'
 import { FormField, inputCls } from '../FormPage'
 import { Button, Chip, ScreenHeader, Segmented, Toggle, cx, haptic, isoDate } from '../../ui/wk'
-import { useDraft, useSubmitCheck } from './formKit'
+import { myTelegramUsername, phoneError, useDraft, usePrefillPhone, useSubmitCheck } from './formKit'
 import { VoiceRecorder, type VoiceValue } from '../../ui/voice'
 
 type WhenKind = 'today' | 'tomorrow' | 'date' | ''
@@ -25,6 +26,7 @@ const initial = {
 	longitude: null as number | null,
 	urgent: false,
 	voice: null as VoiceValue,
+	phone: '',
 }
 
 const GigFormPage: React.FC<{ telegramId: number }> = ({ telegramId }) => {
@@ -35,6 +37,8 @@ const GigFormPage: React.FC<{ telegramId: number }> = ({ telegramId }) => {
 	const dateRef = useRef<HTMLInputElement>(null)
 	const set = <K extends keyof typeof initial>(k: K, v: (typeof initial)[K]) =>
 		setF((p) => ({ ...p, [k]: v }))
+	const { data: profile } = useGetUserProfileQuery(telegramId)
+	usePrefillPhone(profile?.phone, f.phone, (p) => set('phone', p))
 
 	const today = new Date()
 	const tomorrow = new Date()
@@ -53,6 +57,7 @@ const GigFormPage: React.FC<{ telegramId: number }> = ({ telegramId }) => {
 		when: !workDate ? 'Выберите вариант' : undefined,
 		pay: !(Number(f.pay) > 0) ? 'Укажите оплату' : undefined,
 		address: f.address.trim().length < 3 ? 'Укажите адрес' : undefined,
+		phone: phoneError(f.phone),
 	})
 
 	const submit = async () => {
@@ -73,6 +78,7 @@ const GigFormPage: React.FC<{ telegramId: number }> = ({ telegramId }) => {
 					urgent: f.urgent,
 					voiceKey: f.voice?.key,
 					voiceDuration: f.voice?.duration,
+					phone: f.phone,
 				},
 			}).unwrap()
 			haptic.notify('success')
@@ -211,6 +217,25 @@ const GigFormPage: React.FC<{ telegramId: number }> = ({ telegramId }) => {
 				/>
 				{shown.address && <p className='wk-error'>{shown.address}</p>}
 			</div>
+
+
+			<FormField
+				label='Телефон для WhatsApp'
+				error={shown.phone}
+				hint={
+					myTelegramUsername()
+						? undefined
+						: 'У вас нет username в Telegram — исполнители напишут в WhatsApp или через бота'
+				}
+			>
+				<input
+					type='tel'
+					inputMode='tel'
+					value={f.phone || '+996'}
+					onChange={(e) => set('phone', formatPhoneKG(e.target.value))}
+					className={inputCls(shown.phone)}
+				/>
+			</FormField>
 
 			<div className='wk-field'>
 				<Toggle

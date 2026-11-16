@@ -2,12 +2,13 @@
 import React, { useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useToast } from '../../../App'
-import { useGetMyOfferQuery, useUpsertOfferMutation } from '../../store/store'
+import { useGetMyOfferQuery, useGetUserProfileQuery, useUpsertOfferMutation } from '../../store/store'
+import { formatPhoneKG } from '../../../constants'
 import type { OfferPriceUnit } from '../../../types'
 import { FormField, inputCls } from '../FormPage'
 import { Button, Chip, Loader, ScreenHeader, Segmented, Toggle, cx, haptic } from '../../ui/wk'
 import { ProfessionPicker } from '../../ui/ProfessionPicker'
-import { useDraft, useSubmitCheck } from './formKit'
+import { myTelegramUsername, phoneError, useDraft, usePrefillPhone, useSubmitCheck } from './formKit'
 
 const DAYS = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс']
 const MAX_SKILLS = 8
@@ -20,6 +21,7 @@ const initial = {
 	district: '',
 	about: '',
 	isActive: true,
+	phone: '',
 }
 
 const OfferFormPage: React.FC<{ telegramId: number }> = ({ telegramId }) => {
@@ -31,6 +33,8 @@ const OfferFormPage: React.FC<{ telegramId: number }> = ({ telegramId }) => {
 	const hydrated = useRef(false)
 	const set = <K extends keyof typeof initial>(k: K, v: (typeof initial)[K]) =>
 		setF((p) => ({ ...p, [k]: v }))
+	const { data: profile } = useGetUserProfileQuery(telegramId)
+	usePrefillPhone(profile?.phone, f.phone, (p) => set('phone', p))
 
 	// Редактирование: подставляем сохранённую карточку, если черновик пустой
 	useEffect(() => {
@@ -45,6 +49,7 @@ const OfferFormPage: React.FC<{ telegramId: number }> = ({ telegramId }) => {
 				district: existing.district || '',
 				about: existing.about || '',
 				isActive: existing.isActive,
+				phone: f.phone,
 			})
 		}
 	}, [existing])
@@ -53,6 +58,7 @@ const OfferFormPage: React.FC<{ telegramId: number }> = ({ telegramId }) => {
 		skills: f.skills.length === 0 ? 'Выберите, что умеете' : undefined,
 		price: !(Number(f.price) > 0) ? 'Укажите цену' : undefined,
 		days: f.days.length === 0 ? 'Выберите хотя бы один день' : undefined,
+		phone: phoneError(f.phone),
 	})
 
 	const submit = async () => {
@@ -68,6 +74,7 @@ const OfferFormPage: React.FC<{ telegramId: number }> = ({ telegramId }) => {
 					district: f.district.trim() || undefined,
 					about: f.about.trim() || undefined,
 					isActive: f.isActive,
+					phone: f.phone,
 				},
 			}).unwrap()
 			haptic.notify('success')
@@ -164,6 +171,24 @@ const OfferFormPage: React.FC<{ telegramId: number }> = ({ telegramId }) => {
 					placeholder='Опыт, инструменты, есть ли машина'
 					className='wk-input'
 					maxLength={2000}
+				/>
+			</FormField>
+
+			<FormField
+				label='Телефон для WhatsApp'
+				error={shown.phone}
+				hint={
+					myTelegramUsername()
+						? undefined
+						: 'У вас нет username в Telegram — заказчики напишут в WhatsApp или через бота'
+				}
+			>
+				<input
+					type='tel'
+					inputMode='tel'
+					value={f.phone || '+996'}
+					onChange={(e) => set('phone', formatPhoneKG(e.target.value))}
+					className={inputCls(shown.phone)}
 				/>
 			</FormField>
 
