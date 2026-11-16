@@ -1,10 +1,19 @@
-// Реклама сериала на главном экране: большая обложка + «Смотреть 1-ю серию бесплатно».
+// Реклама сериала на главном экране: большая обложка + «Смотреть бесплатно».
 // Нет опубликованных сериалов — баннер не показываем.
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Play } from 'lucide-react'
 import { useGetSeriesListQuery } from '../../store/store'
 import { haptic } from '../../ui/wk'
+
+/** «1 серия бесплатно» / «3 серии бесплатно»; нет бесплатных — пустая строка */
+export const freeEpisodesText = (n?: number) => {
+	if (!n) return ''
+	const m10 = n % 10
+	const m100 = n % 100
+	const word = m10 === 1 && m100 !== 11 ? 'серия' : m10 >= 2 && m10 <= 4 && (m100 < 12 || m100 > 14) ? 'серии' : 'серий'
+	return `${n} ${word} бесплатно`
+}
 
 export const SeriesPromo: React.FC<{ telegramId: number }> = ({ telegramId }) => {
 	const navigate = useNavigate()
@@ -77,9 +86,11 @@ export const SeriesPromo: React.FC<{ telegramId: number }> = ({ telegramId }) =>
 						}}
 					>
 						<Play size={14} strokeWidth={2} fill='currentColor' />
-						{s.hasAccess ? 'Смотреть' : '1-я серия бесплатно'}
+						{s.hasAccess || !s.freeEpisodesCount ? 'Смотреть' : 'Смотреть бесплатно'}
 					</span>
-					<span style={{ fontSize: 13, opacity: 0.85 }}>{s.episodesCount} сер.</span>
+					<span style={{ fontSize: 13, opacity: 0.85 }}>
+						{s.episodesCount} сер.{!s.hasAccess && freeEpisodesText(s.freeEpisodesCount) ? ` · ${freeEpisodesText(s.freeEpisodesCount)}` : ''}
+					</span>
 				</div>
 			</div>
 		</div>

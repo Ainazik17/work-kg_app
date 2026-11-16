@@ -1,4 +1,4 @@
-// Раздел «Сериал»: 1-я серия открыта всем, остальные — с любым тарифом (PRO).
+// Раздел «Сериал»: бесплатные серии (отмечает админ) открыты всем, остальные — с любым тарифом (PRO).
 // /series — список сериалов (если один — сразу открываем его), /series/:id — плеер и серии.
 import React, { useEffect, useRef, useState } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
@@ -6,6 +6,7 @@ import { Lock, Play } from 'lucide-react'
 import { useGetSeriesListQuery, useGetSeriesQuery } from '../../store/store'
 import type { SeriesEpisode } from '../../../types'
 import { Button, EmptyState, Loader, Panel, ScreenHeader, StatusPill, haptic } from '../../ui/wk'
+import { freeEpisodesText } from './SeriesPromo'
 
 const duration = (sec?: number | null) => {
 	if (!sec) return ''
@@ -39,7 +40,7 @@ export const SeriesListPage: React.FC<{ telegramId: number }> = ({ telegramId })
 							<div style={{ padding: 16 }}>
 								<div className='wk-h3'>{s.title}</div>
 								<div className='wk-meta' style={{ marginTop: 4 }}>
-									{s.episodesCount} сер. · 1-я серия бесплатно
+									{s.episodesCount} сер.{freeEpisodesText(s.freeEpisodesCount) ? ` · ${freeEpisodesText(s.freeEpisodesCount)}` : ''}
 								</div>
 							</div>
 						</Panel>
@@ -163,7 +164,9 @@ export const SeriesPage: React.FC<{ telegramId: number }> = ({ telegramId }) => 
 
 			<div className='flex items-center justify-between' style={{ marginTop: 26, marginBottom: 12 }}>
 				<h3 className='wk-h3'>Серии</h3>
-				{!s.hasAccess && <span className='wk-meta'>1-я — бесплатно</span>}
+				{!s.hasAccess && !!freeEpisodesText(s.freeEpisodesCount) && (
+					<span className='wk-meta'>{freeEpisodesText(s.freeEpisodesCount)}</span>
+				)}
 			</div>
 
 			<div className='flex flex-col' style={{ gap: 10 }}>

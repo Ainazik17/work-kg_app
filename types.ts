@@ -386,7 +386,7 @@ export interface SeriesEpisode {
 	description?: string | null
 	thumbnailUrl?: string | null
 	durationSec?: number | null
-	free: boolean // 1-я серия (или отмеченная) — бесплатно
+	free: boolean // бесплатная (отмечает админ)
 	locked: boolean // нужен тариф
 	videoUrl?: string | null // только у открытых
 	youtubeId?: string | null // только у открытых
@@ -397,6 +397,7 @@ export interface Series {
 	description?: string | null
 	coverUrl?: string | null
 	episodesCount: number
+	freeEpisodesCount?: number // сколько серий открыто без тарифа (отмечает админ)
 	hasAccess: boolean
 	episodes?: SeriesEpisode[]
 }

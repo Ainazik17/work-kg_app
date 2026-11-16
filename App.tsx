@@ -1744,7 +1744,7 @@ const ProfilePage: React.FC<{ telegramId: number }> = ({ telegramId }) => {
 						{
 							icon: <Clapperboard size={20} strokeWidth={1.8} />,
 							label: 'Сериал',
-							value: '1-я серия бесплатно',
+							value: 'Смотреть',
 							onClick: () => navigate('/series'),
 						},
 						{
