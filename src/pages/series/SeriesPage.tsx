@@ -7,6 +7,7 @@ import { useGetSeriesListQuery, useGetSeriesQuery } from '../../store/store'
 import type { SeriesEpisode } from '../../../types'
 import { Button, EmptyState, Loader, Panel, ScreenHeader, StatusPill, haptic } from '../../ui/wk'
 import { freeEpisodesText } from './SeriesPromo'
+import { YouTubePlayer } from './YouTubePlayer'
 
 const duration = (sec?: number | null) => {
 	if (!sec) return ''
@@ -111,13 +112,11 @@ export const SeriesPage: React.FC<{ telegramId: number }> = ({ telegramId }) => 
 				{paywall ? (
 					<Paywall ep={paywall} cover={paywall.thumbnailUrl || s.coverUrl} onBuy={() => navigate('/subscription')} />
 				) : current?.youtubeId ? (
-					<iframe
+					<YouTubePlayer
 						key={current.id}
-						src={`https://www.youtube-nocookie.com/embed/${current.youtubeId}?rel=0&modestbranding=1&playsinline=1`}
-						title={current.title}
-						allow='accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture; fullscreen'
-						allowFullScreen
-						style={{ width: '100%', height: '100%', border: 0, display: 'block' }}
+						videoId={current.youtubeId}
+						poster={current.thumbnailUrl || s.coverUrl}
+						onEnded={() => next && pick(next)}
 					/>
 				) : current?.videoUrl ? (
 					<video
